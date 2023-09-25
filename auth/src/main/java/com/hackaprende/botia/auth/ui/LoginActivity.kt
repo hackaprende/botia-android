@@ -10,19 +10,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.tooling.preview.Preview
-import com.hackaprende.botia.ui.ui.theme.MyBotiaTheme
+import com.hackaprende.botia.ui.ui.theme.BotiaTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyBotiaTheme {
+            BotiaTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    Greeting("Compirringui")
                 }
             }
         }
@@ -40,7 +42,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    MyBotiaTheme {
-        Greeting("Android")
+    BotiaTheme {
+        Greeting("Compillas")
     }
 }
