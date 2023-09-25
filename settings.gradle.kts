@@ -17,3 +17,4 @@ rootProject.name = "Botia"
 include(":app")
 include(":core")
 include(":auth")
+include(":ui")
