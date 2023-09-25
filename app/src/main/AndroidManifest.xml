@@ -13,14 +13,8 @@
         android:theme="@style/Theme.Botia"
         tools:targetApi="31">
         <activity
-            android:name=".auth.LoginActivity"
-            android:exported="false"
-            android:label="@string/title_activity_login"
-            android:theme="@style/Theme.Botia" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".auth.ui.LoginActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Botia">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

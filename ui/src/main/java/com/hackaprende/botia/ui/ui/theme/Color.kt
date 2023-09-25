@@ -1,4 +1,4 @@
-package com.hackaprende.botia.ui.theme
+package com.hackaprende.botia.ui.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
