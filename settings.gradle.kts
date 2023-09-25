@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Botia"
 include(":app")
- 
+include(":core")
