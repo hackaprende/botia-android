@@ -78,7 +78,7 @@ private fun Content(
             label = stringResource(id = R.string.email),
             modifier = Modifier
                 .fillMaxWidth(),
-            email = email.value,
+            text = email.value,
             onTextChanged = {
                 email.value = it
                 resetFieldErrors()
@@ -93,7 +93,7 @@ private fun Content(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            email = password.value,
+            text = password.value,
             onTextChanged = {
                 password.value = it
                 resetFieldErrors()

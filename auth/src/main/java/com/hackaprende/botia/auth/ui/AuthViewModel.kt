@@ -2,6 +2,7 @@ package com.hackaprende.botia.auth.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hackaprende.botia.auth.R
 import com.hackaprende.botia.auth.repository.AuthRepository
 import com.hackaprende.botia.core.api.ApiResponseStatus
 import com.hackaprende.botia.core.model.User
@@ -17,6 +18,8 @@ data class AuthScreenState(
     val status: ApiResponseStatus<Any?>,
     val user: User?,
     val emailFieldError: Int?,
+    val firstNameFieldError: Int?,
+    val lastNameFieldError: Int?,
     val passwordFieldError: Int?,
     val confirmPasswordFieldError: Int?,
 )
@@ -25,6 +28,8 @@ private val initialState = AuthScreenState(
     status = ApiResponseStatus.None(),
     user = null,
     emailFieldError = null,
+    firstNameFieldError = null,
+    lastNameFieldError = null,
     passwordFieldError = null,
     confirmPasswordFieldError = null,
 )
@@ -59,6 +64,55 @@ class AuthViewModel @Inject constructor(
             .login(username, password)
             .onEach (::processLoginResult)
             .launchIn(viewModelScope)
+    }
+
+    fun signUp(
+        username: String,
+        password: String,
+        passwordConfirmation: String,
+        firstName: String,
+        lastName: String,
+    ) {
+        viewModelScope.launch {
+            val newState: AuthScreenState = when {
+                username.isEmpty() -> state.value.copy(
+                    emailFieldError = R.string.email_is_not_valid,
+                )
+
+                firstName.isEmpty() -> state.value.copy(
+                    firstNameFieldError = R.string.field_must_not_be_empty,
+                )
+
+                lastName.isEmpty() -> state.value.copy(
+                    lastNameFieldError = R.string.field_must_not_be_empty,
+                )
+
+                password.isEmpty() -> state.value.copy(
+                    passwordFieldError = R.string.password_must_not_be_empty,
+                )
+
+                passwordConfirmation.isEmpty() -> state.value.copy(
+                    confirmPasswordFieldError = R.string.password_must_not_be_empty,
+                )
+
+                password != passwordConfirmation -> {
+                    state.value.copy(
+                        passwordFieldError = R.string.passwords_do_not_match,
+                        confirmPasswordFieldError = R.string.passwords_do_not_match,
+                    )
+                }
+
+                else -> {
+                    authRepository
+                        .signUp(username, password, firstName, lastName)
+                        .onEach (::processLoginResult)
+                        .launchIn(viewModelScope)
+                    state.value
+                }
+            }
+
+            stateFlow.emit(newState)
+        }
     }
 
     private suspend fun processLoginResult(apiResponseStatus: ApiResponseStatus<User>) {

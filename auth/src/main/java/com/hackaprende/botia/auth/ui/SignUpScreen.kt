@@ -33,7 +33,13 @@ import com.hackaprende.botia.ui.AuthField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    onSignUpButtonClick: (email: String, password: String, passwordConfirmation: String) -> Unit,
+    onSignUpButtonClick: (
+        email: String,
+        password: String,
+        passwordConfirmation: String,
+        firstName: String,
+        lastName: String,
+    ) -> Unit,
     onNavigationIconClick: () -> Unit,
     authViewModel: AuthViewModel,
 ) {
@@ -58,10 +64,18 @@ fun SignUpScreen(
 private fun Content(
     modifier: Modifier = Modifier,
     resetFieldErrors: () -> Unit,
-    onSignUpButtonClick: (email: String, password: String, passwordConfirmation: String) -> Unit,
+    onSignUpButtonClick: (
+        email: String,
+        password: String,
+        passwordConfirmation: String,
+        firstName: String,
+        lastName: String,
+    ) -> Unit,
     authViewModel: AuthViewModel,
 ) {
     val email = remember { mutableStateOf("") }
+    val firstName = remember { mutableStateOf("") }
+    val lastName = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val confirmPassword = remember { mutableStateOf("") }
     val state = authViewModel.state.collectAsState().value
@@ -81,9 +95,35 @@ private fun Content(
             label = stringResource(id = R.string.email),
             modifier = Modifier
                 .fillMaxWidth(),
-            email = email.value,
+            text = email.value,
             onTextChanged = {
                 email.value = it
+                resetFieldErrors()
+            },
+            errorMessageId = state.emailFieldError
+        )
+
+        AuthField(
+            label = stringResource(id = R.string.first_name),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            text = firstName.value,
+            onTextChanged = {
+                firstName.value = it
+                resetFieldErrors()
+            },
+            errorMessageId = state.emailFieldError
+        )
+
+        AuthField(
+            label = stringResource(id = R.string.last_name),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            text = lastName.value,
+            onTextChanged = {
+                lastName.value = it
                 resetFieldErrors()
             },
             errorMessageId = state.emailFieldError
@@ -94,7 +134,7 @@ private fun Content(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            email = password.value,
+            text = password.value,
             onTextChanged = {
                 password.value = it
                 resetFieldErrors()
@@ -108,7 +148,7 @@ private fun Content(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            email = confirmPassword.value,
+            text = confirmPassword.value,
             onTextChanged = {
                 confirmPassword.value = it
                 resetFieldErrors()
@@ -122,7 +162,13 @@ private fun Content(
             .padding(top = 16.dp)
             .semantics { testTag = "sign-up-button" },
             onClick = {
-                onSignUpButtonClick(email.value, password.value, confirmPassword.value)
+                onSignUpButtonClick(
+                    email.value,
+                    password.value,
+                    confirmPassword.value,
+                    firstName.value,
+                    lastName.value
+                )
             }) {
             Text(
                 stringResource(R.string.sign_up),

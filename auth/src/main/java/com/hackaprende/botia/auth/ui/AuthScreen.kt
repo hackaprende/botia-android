@@ -32,8 +32,8 @@ fun AuthScreen(
     AuthNavHost(
         navController = navController,
         onLoginButtonClick = { email, password -> authViewModel.login(email, password) },
-        onSignUpButtonClick = { email, password, confirmPassword ->
-            // TODO - Sign up
+        onSignUpButtonClick = { email, password, confirmPassword, firstName, lastName ->
+            authViewModel.signUp(email, password, confirmPassword, firstName, lastName)
         },
         authViewModel = authViewModel,
     )
@@ -49,7 +49,13 @@ fun AuthScreen(
 private fun AuthNavHost(
     navController: NavHostController,
     onLoginButtonClick: (String, String) -> Unit,
-    onSignUpButtonClick: (email: String, password: String, passwordConfirmation: String) -> Unit,
+    onSignUpButtonClick: (
+        email: String,
+        password: String,
+        passwordConfirmation: String,
+        firstName: String,
+        lastName: String
+    ) -> Unit,
     authViewModel: AuthViewModel,
 ) {
     NavHost(

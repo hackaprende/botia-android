@@ -60,7 +60,7 @@ fun ErrorDialog(
 @Composable
 fun AuthField(
     label: String,
-    email: String,
+    text: String,
     onTextChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
     errorSemantic: String = "",
@@ -81,7 +81,7 @@ fun AuthField(
             modifier = Modifier.fillMaxWidth()
                 .semantics { testTag = fieldSemantic },
             label = { Text(label) },
-            value = email,
+            value = text,
             onValueChange = { onTextChanged(it) },
             visualTransformation = visualTransformation,
             isError = errorMessageId != null
