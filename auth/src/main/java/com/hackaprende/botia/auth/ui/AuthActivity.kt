@@ -1,6 +1,8 @@
 package com.hackaprende.botia.auth.ui
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,25 +26,14 @@ class LoginActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Compirringui")
+                    AuthScreen(onUserLoggedIn = {
+                        user ->
+                        // TODO - Open logged in screen
+                        Log.d("MANZANA", "Logged in!!!! ${user.id}\n${user.email}\n${user.authenticationToken}")
+                        Toast.makeText(this@LoginActivity, "Logged in!!!!", Toast.LENGTH_SHORT).show()
+                    })
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BotiaTheme {
-        Greeting("Compillas")
     }
 }

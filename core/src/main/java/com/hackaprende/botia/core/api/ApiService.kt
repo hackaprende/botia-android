@@ -1,9 +1,9 @@
 package com.hackaprende.botia.core.api
 
 import com.hackaprende.botia.core.AUTHENTICATION_ENDPOINT
-import com.hackaprende.botia.core.dto.LoginDTO
-import com.hackaprende.botia.core.dto.SignUpDTO
-import com.hackaprende.botia.core.responses.AuthApiResponse
+import com.hackaprende.botia.core.api.dto.LoginDTO
+import com.hackaprende.botia.core.api.dto.SignUpDTO
+import com.hackaprende.botia.core.api.responses.AuthApiResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
 

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Botia</string>
+    <string name="error_making_request">Error making request</string>
+    <string name="error_no_internet">No internet connection</string>
+</resources>
