@@ -15,10 +15,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Botia"
         tools:targetApi="31">
+
         <activity
-            android:name=".auth.ui.AuthActivity"
+            android:name=".customers.ui.CustomersActivity"
             android:exported="true"
-            android:theme="@style/Theme.Botia">
+            android:theme="@style/Theme.Botia" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,9 +29,9 @@
         </activity>
 
         <activity
-            android:name=".customers.ui.CustomersActivity"
+            android:name=".auth.ui.AuthActivity"
             android:exported="false"
-            android:theme="@style/Theme.Botia" />
+            android:theme="@style/Theme.Botia"/>
     </application>
 
 </manifest>

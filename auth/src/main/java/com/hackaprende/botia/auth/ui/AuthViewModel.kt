@@ -43,25 +43,6 @@ class AuthViewModel @Inject constructor(
     private val stateFlow = MutableStateFlow(initialState)
     val state = stateFlow.asStateFlow()
 
-    init {
-        isUserLoggedIn()
-    }
-
-    private fun isUserLoggedIn() {
-        sessionManager
-            .userTokenFlow()
-            .onEach {
-                // User was already logged in
-                stateFlow.emit(
-                    state.value.copy(
-                        authenticationToken = it
-                    )
-                )
-            }
-            .launchIn(viewModelScope)
-
-    }
-
     fun resetApiResponseStatus() {
         viewModelScope.launch {
             stateFlow.emit(initialState)

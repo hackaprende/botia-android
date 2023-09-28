@@ -1,8 +1,11 @@
 package com.hackaprende.botia.customers.ui
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -10,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.hackaprende.botia.customers.R
 import com.hackaprende.botia.ui.ui.theme.BotiaTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,10 +30,32 @@ class CustomersActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    Column {
+                        Greeting(name = "Customers Activity!!!")
+                        CustomersScreen(logoutUser = {
+                            openAuthActivity()
+                        })
+                    }
                 }
             }
         }
+    }
+
+    private fun openAuthActivity() {
+        try {
+            startActivity(
+                Intent(
+                    this,
+                    Class.forName("com.hackaprende.botia.auth.ui.AuthActivity")
+                )
+            )
+        } catch (e: ClassNotFoundException) {
+            Toast.makeText(
+                this,
+                getString(R.string.login_activity_not_found), Toast.LENGTH_SHORT
+            ).show()
+        }
+        finish()
     }
 }
 
