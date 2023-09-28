@@ -29,7 +29,7 @@ object ApiServiceInterceptor : Interceptor {
                 throw RuntimeException("Need to be authenticated to perform this request")
             } else {
                 val token = "Token ${sessionToken!!}"
-                requestBuilder.addHeader("Authorization:  ", token)
+                requestBuilder.addHeader("Authorization", token)
             }
         }
         return chain.proceed(requestBuilder.build())
