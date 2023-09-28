@@ -1,4 +1,4 @@
-package com.hackaprende.botia.customers.api
+package com.hackaprende.botia.customers.api.services
 
 import com.hackaprende.botia.core.USER_COMPANY_ENDPOINT
 import com.hackaprende.botia.core.api.ApiServiceInterceptor

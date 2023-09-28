@@ -6,7 +6,9 @@ import com.hackaprende.botia.core.api.ApiResponseStatus
 import com.hackaprende.botia.core.api.ApiServiceInterceptorHandler
 import com.hackaprende.botia.customers.model.Company
 import com.hackaprende.botia.core.util.SessionManager
+import com.hackaprende.botia.customers.model.Customer
 import com.hackaprende.botia.customers.repository.CompanyRepository
+import com.hackaprende.botia.customers.repository.CustomerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,17 +20,20 @@ data class CustomersScreenState(
     val status: ApiResponseStatus<Any?>,
     val isUserLoggedIn: Boolean,
     val company: Company?,
+    val customers: List<Customer>
 )
 
 private val initialState = CustomersScreenState(
     status = ApiResponseStatus.None(),
     isUserLoggedIn = true,
     company = null,
+    customers = listOf(),
 )
 @HiltViewModel
 class CustomersViewModel @Inject constructor(
     private val sessionManager: SessionManager,
-    private val companyRepository: CompanyRepository
+    private val companyRepository: CompanyRepository,
+    private val customerRepository: CustomerRepository,
 ) : ViewModel() {
     private val stateFlow = MutableStateFlow(initialState)
     val state = stateFlow.asStateFlow()
@@ -69,8 +74,34 @@ class CustomersViewModel @Inject constructor(
 
     private suspend fun handleUserCompanyResponseStatus(apiResponseStatus: ApiResponseStatus<Company>) {
         val newState = if (apiResponseStatus is ApiResponseStatus.Success) {
+            val company = apiResponseStatus.data
+            getCompanyCustomers(company.id)
             state.value.copy(
-                company = apiResponseStatus.data
+                company = company
+            )
+        } else {
+            state.value.copy(
+                status = apiResponseStatus,
+            )
+        }
+
+        stateFlow.emit(newState)
+    }
+
+    private fun getCompanyCustomers(companyId: Int) {
+        customerRepository
+            .getCompanyCustomers(companyId)
+            .onEach(::handleCustomersResponseStatus)
+            .launchIn(viewModelScope)
+    }
+
+    private suspend fun handleCustomersResponseStatus(
+        apiResponseStatus: ApiResponseStatus<List<Customer>>
+    ) {
+        val newState = if (apiResponseStatus is ApiResponseStatus.Success) {
+            val customers = apiResponseStatus.data
+            state.value.copy(
+                customers = customers
             )
         } else {
             state.value.copy(

@@ -1,6 +1,6 @@
 package com.hackaprende.botia.customers.di
 
-import com.hackaprende.botia.customers.api.CompanyApiService
+import com.hackaprende.botia.customers.api.services.CompanyApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

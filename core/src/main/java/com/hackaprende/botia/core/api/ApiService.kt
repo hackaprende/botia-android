@@ -13,7 +13,4 @@ interface ApiService {
 
     @POST(AUTHENTICATION_ENDPOINT)
     suspend fun signUp(@Body signUpDTO: SignUpDTO): AuthApiResponse
-
-//    @GET(COMPANY_CUSTOMERS_ENDPOINT)
-//    suspend fun getCompanyCustomers(@Query("company_id") companyId: Int): DogApiResponse
 }

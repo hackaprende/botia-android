@@ -1,9 +1,8 @@
 package com.hackaprende.botia.customers.repository
 
 import com.hackaprende.botia.core.api.ApiResponseStatus
-import com.hackaprende.botia.core.api.ApiService
 import com.hackaprende.botia.core.api.Network
-import com.hackaprende.botia.customers.api.CompanyApiService
+import com.hackaprende.botia.customers.api.services.CompanyApiService
 import com.hackaprende.botia.customers.api.mappers.CompanyDTOMapper
 import com.hackaprende.botia.customers.model.Company
 import kotlinx.coroutines.flow.Flow
