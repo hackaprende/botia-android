@@ -5,6 +5,7 @@ import com.hackaprende.botia.core.api.dto.LoginDTO
 import com.hackaprende.botia.core.api.dto.SignUpDTO
 import com.hackaprende.botia.core.api.responses.AuthApiResponse
 import retrofit2.http.Body
+import retrofit2.http.Headers
 import retrofit2.http.POST
 
 interface ApiService {

@@ -1,22 +1,21 @@
 package com.hackaprende.botia.auth.ui
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.tooling.preview.Preview
+import com.hackaprende.botia.auth.R
+import com.hackaprende.botia.core.api.ApiServiceInterceptorHandler
 import com.hackaprende.botia.ui.ui.theme.BotiaTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class LoginActivity : ComponentActivity() {
+class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -27,13 +26,27 @@ class LoginActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     AuthScreen(onUserLoggedIn = {
-                        user ->
-                        // TODO - Open logged in screen
-                        Log.d("MANZANA", "Logged in!!!! ${user.id}\n${user.email}\n${user.authenticationToken}")
-                        Toast.makeText(this@LoginActivity, "Logged in!!!!", Toast.LENGTH_SHORT).show()
+                            authenticationToken ->
+                        ApiServiceInterceptorHandler.setSessionToken(authenticationToken)
+                        openCustomersActivity()
                     })
                 }
             }
         }
+    }
+
+    private fun openCustomersActivity() {
+        try {
+            startActivity(
+                Intent(
+                    this,
+                    Class.forName("com.hackaprende.botia.customers.ui.CustomersActivity")
+                )
+            )
+        } catch (e: ClassNotFoundException) {
+            Toast.makeText(this,
+                getString(R.string.customers_activity_not_found), Toast.LENGTH_SHORT).show()
+        }
+        finish()
     }
 }

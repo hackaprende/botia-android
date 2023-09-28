@@ -15,6 +15,8 @@ import com.hackaprende.botia.ui.ui.theme.BotiaTheme
 class CustomersActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         setContent {
             BotiaTheme {
                 // A surface container using the 'background' color from the theme

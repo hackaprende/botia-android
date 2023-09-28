@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.hackaprende.botia.auth.R
 import com.hackaprende.botia.auth.repository.AuthRepository
 import com.hackaprende.botia.core.api.ApiResponseStatus
+import com.hackaprende.botia.core.api.ApiServiceInterceptor
 import com.hackaprende.botia.core.model.User
+import com.hackaprende.botia.core.util.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +18,7 @@ import javax.inject.Inject
 
 data class AuthScreenState(
     val status: ApiResponseStatus<Any?>,
-    val user: User?,
+    val authenticationToken: String?,
     val emailFieldError: Int?,
     val firstNameFieldError: Int?,
     val lastNameFieldError: Int?,
@@ -26,7 +28,7 @@ data class AuthScreenState(
 
 private val initialState = AuthScreenState(
     status = ApiResponseStatus.None(),
-    user = null,
+    authenticationToken = null,
     emailFieldError = null,
     firstNameFieldError = null,
     lastNameFieldError = null,
@@ -36,10 +38,29 @@ private val initialState = AuthScreenState(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
     private val stateFlow = MutableStateFlow(initialState)
     val state = stateFlow.asStateFlow()
 
+    init {
+        isUserLoggedIn()
+    }
+
+    private fun isUserLoggedIn() {
+        sessionManager
+            .userTokenFlow()
+            .onEach {
+                // User was already logged in
+                stateFlow.emit(
+                    state.value.copy(
+                        authenticationToken = it
+                    )
+                )
+            }
+            .launchIn(viewModelScope)
+
+    }
 
     fun resetApiResponseStatus() {
         viewModelScope.launch {
@@ -117,9 +138,11 @@ class AuthViewModel @Inject constructor(
 
     private suspend fun processLoginResult(apiResponseStatus: ApiResponseStatus<User>) {
         val newState = if (apiResponseStatus is ApiResponseStatus.Success) {
+            val user = apiResponseStatus.data
+            sessionManager.storeUser(user)
             state.value.copy(
                 status = apiResponseStatus,
-                user = apiResponseStatus.data
+                authenticationToken = user.authenticationToken
             )
         } else {
             state.value.copy(

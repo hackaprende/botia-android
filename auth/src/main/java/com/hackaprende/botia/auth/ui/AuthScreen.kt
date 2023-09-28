@@ -16,15 +16,15 @@ import com.hackaprende.botia.ui.LoadingWheel
 
 @Composable
 fun AuthScreen(
-    onUserLoggedIn: (User) -> Unit,
+    onUserLoggedIn: (String) -> Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     val state = authViewModel.state.collectAsState().value
     val status = state.status
-    val user = state.user
+    val authenticationToken = state.authenticationToken
 
-    if (user != null) {
-        onUserLoggedIn(user)
+    if (!authenticationToken.isNullOrEmpty()) {
+        onUserLoggedIn(authenticationToken)
     }
 
     val navController = rememberNavController()
