@@ -1,4 +1,4 @@
-package com.hackaprende.botia.core.api.dto
+package com.hackaprende.botia.customers.api.dto
 
 import com.squareup.moshi.Json
 

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hackaprende.botia.core.api.ApiResponseStatus
 import com.hackaprende.botia.core.api.ApiServiceInterceptorHandler
-import com.hackaprende.botia.core.model.Company
+import com.hackaprende.botia.customers.model.Company
 import com.hackaprende.botia.core.util.SessionManager
 import com.hackaprende.botia.customers.repository.CompanyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
