@@ -1,6 +1,7 @@
 package com.hackaprende.botia.customers.ui
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -13,7 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import com.hackaprende.botia.customers.R
+import com.hackaprende.botia.customers.utils.WHATSAPP_URL
 import com.hackaprende.botia.ui.ui.theme.BotiaTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -31,10 +34,15 @@ class CustomersActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column {
-                        Greeting(name = "Customers Activity!!!")
                         CustomersScreen(logoutUser = {
                             openAuthActivity()
-                        })
+                        }, onCustomerSelected = {
+                            val url = "$WHATSAPP_URL${it.phoneNumber}"
+                            val i = Intent(Intent.ACTION_VIEW)
+                            i.data = Uri.parse(url)
+                            startActivity(i)
+                        }
+                        )
                     }
                 }
             }
