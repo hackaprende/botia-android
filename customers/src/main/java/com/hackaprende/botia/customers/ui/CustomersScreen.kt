@@ -22,6 +22,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,6 +55,7 @@ fun CustomersScreen(
     val isUserLoggedIn = state.isUserLoggedIn
     val customers = state.customers
     val status = state.status
+    val customerToBeDisabled = remember { mutableStateOf<Customer?>(null) }
 
     if (!isUserLoggedIn) {
         logoutUser()
@@ -70,7 +73,11 @@ fun CustomersScreen(
                 customers = customers,
                 onEnableBotSwitchClick = {
                         customer ->
-                    customersViewModel.toggleBotEnabledForCustomer(customer)
+                    if (customer.isBotEnabled) {
+                        customerToBeDisabled.value = customer
+                    } else {
+                        customersViewModel.toggleBotEnabledForCustomer(customer)
+                    }
                 },
                 onCustomerSelected = onCustomerSelected,
             )
@@ -85,8 +92,49 @@ fun CustomersScreen(
                     },
                 )
             }
+
+            val customerToBeDisabledValue = customerToBeDisabled.value
+            if (customerToBeDisabledValue != null) {
+                DisableBotDialog(
+                    onAccept = {
+                        customersViewModel.toggleBotEnabledForCustomer(customerToBeDisabledValue)
+                        customerToBeDisabled.value = null
+                    },
+                    onCancel = {
+                        customerToBeDisabled.value = null
+                    }
+                )
+            }
         }
     }
+}
+
+@Composable
+fun DisableBotDialog(
+    onAccept: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        modifier = Modifier
+            .semantics { testTag = "error-dialog" },
+        onDismissRequest = { },
+        title = {
+            Text(stringResource(R.string.bot_will_be_disabled_alert_title))
+        },
+        text = {
+            Text(stringResource(id = R.string.bot_will_be_disabled_alert_message))
+        },
+        confirmButton = {
+            Button(onClick = { onAccept() }) {
+                Text(stringResource(android.R.string.ok))
+            }
+        },
+        dismissButton = {
+            Button(onClick = { onCancel() }) {
+                Text(stringResource(android.R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable
