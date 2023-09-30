@@ -1,19 +1,41 @@
 package com.hackaprende.botia.customers.ui
 
-import android.content.Intent
-import android.net.Uri
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Button
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat.startActivity
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.hackaprende.botia.core.api.ApiResponseStatus
+import com.hackaprende.botia.customers.R
+import com.hackaprende.botia.customers.model.Company
 import com.hackaprende.botia.customers.model.Customer
+import com.hackaprende.botia.ui.LoadingWheel
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomersScreen(
     logoutUser: () -> Unit,
@@ -23,37 +45,110 @@ fun CustomersScreen(
     val state = customersViewModel.state.collectAsState().value
     val isUserLoggedIn = state.isUserLoggedIn
     val customers = state.customers
+    val status = state.status
 
     if (!isUserLoggedIn) {
         logoutUser()
     }
 
-    CustomerList(
-        customers = customers,
-        onCustomerSelected = {
-            onCustomerSelected(it)
-    })
+    Scaffold(
+        topBar = { CustomersScreenTopBar() }
+    ) {
+        CustomerList(
+            modifier = Modifier.padding(it),
+            customers = customers,
+            onCustomerSelected = onCustomerSelected
+        )
+    }
+
+    if (status is ApiResponseStatus.Loading) {
+        LoadingWheel()
+    } else if (status is ApiResponseStatus.Error) {
+        ErrorText(
+            modifier = Modifier
+                .fillMaxSize(),
+            errorText = status.message
+        )
+    }
+}
+
+@Composable
+fun ErrorText(
+    modifier: Modifier = Modifier,
+    errorText: String,
+) {
+    Box(
+        modifier = modifier,
+    ) {
+        Text(
+            text = errorText
+        )
+    }
 }
 
 @Composable
 private fun CustomerList(
+    modifier: Modifier = Modifier,
     customers: List<Customer>,
     onCustomerSelected: (Customer) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier
+            .padding(16.dp),
     ) {
         itemsIndexed(
             items = customers,
             key = { _, item -> item.hashCode() },
-            itemContent = { index, item ->
-                Button(onClick = {
-                    onCustomerSelected(item)
-                }) {
-                    Text(item.phoneNumber)
+            itemContent = { _, item ->
+
+                Row(
+                    modifier = Modifier
+                        .padding(top = 16.dp, bottom = 16.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    ClickableText(
+                        text = AnnotatedString(text = item.phoneNumber),
+                        onClick = {
+                            onCustomerSelected(item)
+                        },
+                        style = TextStyle(
+                            fontSize = 16.sp
+                        )
+                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                    ) {
+                        Text(
+                            text = item.lastInteractionDate,
+                            textAlign = TextAlign.Right
+                        )
+                        Text(
+                            modifier = Modifier
+                                .padding(top = 4.dp),
+                            text = item.lastInteractionHour,
+                            textAlign = TextAlign.Right
+                        )
+                    }
+
                 }
+
+                Divider(color = Color.Black, thickness = 1.dp)
             }
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomersScreenTopBar() {
+    TopAppBar(
+        title = { Text(stringResource(id = R.string.my_customers)) },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = Color.White,
+            titleContentColor = Color.Black
+        ),
+    )
 }

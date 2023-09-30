@@ -5,5 +5,5 @@ import com.hackaprende.botia.customers.model.Company
 
 class CompanyDTOMapper {
     fun fromCompanyDTOToCompanyDomain(companyDTO: CompanyDTO) =
-        Company(companyDTO.id, companyDTO.phoneNumber)
+        Company(companyDTO.id, companyDTO.phoneNumber, companyDTO.timezone)
 }

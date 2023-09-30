@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.util.Collections
 import javax.inject.Inject
 
 data class CustomersScreenState(
@@ -29,6 +30,7 @@ private val initialState = CustomersScreenState(
     company = null,
     customers = listOf(),
 )
+
 @HiltViewModel
 class CustomersViewModel @Inject constructor(
     private val sessionManager: SessionManager,
@@ -100,8 +102,11 @@ class CustomersViewModel @Inject constructor(
     ) {
         val newState = if (apiResponseStatus is ApiResponseStatus.Success) {
             val customers = apiResponseStatus.data
+            // We are sorting the customers from recent to older, for more details check
+            // Customer class Comparable.
+            val sortedCustomers = customers.sorted()
             state.value.copy(
-                customers = customers
+                customers = sortedCustomers
             )
         } else {
             state.value.copy(
