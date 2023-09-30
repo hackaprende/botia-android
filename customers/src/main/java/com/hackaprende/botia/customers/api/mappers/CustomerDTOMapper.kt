@@ -4,7 +4,7 @@ import com.hackaprende.botia.customers.api.dto.CustomerDTO
 import com.hackaprende.botia.customers.model.Customer
 
 class CustomerDTOMapper {
-    private fun fromCustomerDTOToCustomerDomain(customerDTO: CustomerDTO) =
+    fun fromCustomerDTOToCustomerDomain(customerDTO: CustomerDTO) =
         Customer(
             customerDTO.id,
             customerDTO.name,

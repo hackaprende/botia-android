@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.util.Collections
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CustomersScreenState(
@@ -42,6 +42,27 @@ class CustomersViewModel @Inject constructor(
 
     init {
         isUserLoggedIn()
+    }
+
+    fun toggleBotEnabledForCustomer(customer: Customer) {
+        customerRepository
+            .toggleBotEnabledForCustomer(customer.id, !customer.isBotEnabled)
+            .onEach(::handleToggleBotEnabledForCustomerResponse)
+            .launchIn(viewModelScope)
+    }
+
+    private suspend fun handleToggleBotEnabledForCustomerResponse(
+        apiResponseStatus: ApiResponseStatus<Unit>
+    ) {
+        if (apiResponseStatus is ApiResponseStatus.Success) {
+            // Customers are not visible if no company, so company cannot be null here
+            getCompanyCustomers(state.value.company!!.id)
+        } else {
+            val newState = state.value.copy(
+                status = apiResponseStatus,
+            )
+            stateFlow.emit(newState)
+        }
     }
 
     private fun isUserLoggedIn() {
@@ -79,7 +100,8 @@ class CustomersViewModel @Inject constructor(
             val company = apiResponseStatus.data
             getCompanyCustomers(company.id)
             state.value.copy(
-                company = company
+                status = apiResponseStatus,
+                company = company,
             )
         } else {
             state.value.copy(
@@ -106,6 +128,7 @@ class CustomersViewModel @Inject constructor(
             // Customer class Comparable.
             val sortedCustomers = customers.sorted()
             state.value.copy(
+                status = apiResponseStatus,
                 customers = sortedCustomers
             )
         } else {
@@ -115,5 +138,15 @@ class CustomersViewModel @Inject constructor(
         }
 
         stateFlow.emit(newState)
+    }
+
+    fun resetApiResponseStatus() {
+        viewModelScope.launch {
+            stateFlow.emit(
+                state.value.copy(
+                    status = ApiResponseStatus.None(),
+                )
+            )
+        }
     }
 }

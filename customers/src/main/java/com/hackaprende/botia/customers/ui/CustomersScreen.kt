@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -22,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +38,7 @@ import com.hackaprende.botia.core.api.ApiResponseStatus
 import com.hackaprende.botia.customers.R
 import com.hackaprende.botia.customers.model.Company
 import com.hackaprende.botia.customers.model.Customer
+import com.hackaprende.botia.ui.ErrorDialog
 import com.hackaprende.botia.ui.LoadingWheel
 
 
@@ -54,35 +61,31 @@ fun CustomersScreen(
     Scaffold(
         topBar = { CustomersScreenTopBar() }
     ) {
-        CustomerList(
-            modifier = Modifier.padding(it),
-            customers = customers,
-            onCustomerSelected = onCustomerSelected
-        )
-    }
-
-    if (status is ApiResponseStatus.Loading) {
-        LoadingWheel()
-    } else if (status is ApiResponseStatus.Error) {
-        ErrorText(
+        Box(
             modifier = Modifier
                 .fillMaxSize(),
-            errorText = status.message
-        )
-    }
-}
+        ) {
+            CustomerList(
+                modifier = Modifier.padding(it),
+                customers = customers,
+                onEnableBotSwitchClick = {
+                        customer ->
+                    customersViewModel.toggleBotEnabledForCustomer(customer)
+                },
+                onCustomerSelected = onCustomerSelected,
+            )
 
-@Composable
-fun ErrorText(
-    modifier: Modifier = Modifier,
-    errorText: String,
-) {
-    Box(
-        modifier = modifier,
-    ) {
-        Text(
-            text = errorText
-        )
+            if (status is ApiResponseStatus.Loading) {
+                LoadingWheel()
+            } else if (status is ApiResponseStatus.Error) {
+                ErrorDialog(
+                    message = status.message,
+                    onDialogDismiss = {
+                        customersViewModel.resetApiResponseStatus()
+                    },
+                )
+            }
+        }
     }
 }
 
@@ -90,6 +93,7 @@ fun ErrorText(
 private fun CustomerList(
     modifier: Modifier = Modifier,
     customers: List<Customer>,
+    onEnableBotSwitchClick: (Customer) -> Unit,
     onCustomerSelected: (Customer) -> Unit,
 ) {
     LazyColumn(
@@ -106,33 +110,46 @@ private fun CustomerList(
                         .padding(top = 16.dp, bottom = 16.dp)
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    ClickableText(
-                        text = AnnotatedString(text = item.phoneNumber),
-                        onClick = {
-                            onCustomerSelected(item)
-                        },
-                        style = TextStyle(
-                            fontSize = 16.sp
-                        )
+                    Switch(
+                        checked = item.isBotEnabled,
+                        onCheckedChange = {
+                            onEnableBotSwitchClick(item)
+                        }
                     )
 
-                    Column(
-                        horizontalAlignment = Alignment.End,
+                    Row(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            text = item.lastInteractionDate,
-                            textAlign = TextAlign.Right
+                        ClickableText(
+                            text = AnnotatedString(text = item.phoneNumber),
+                            onClick = {
+                                onCustomerSelected(item)
+                            },
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
                         )
-                        Text(
-                            modifier = Modifier
-                                .padding(top = 4.dp),
-                            text = item.lastInteractionHour,
-                            textAlign = TextAlign.Right
-                        )
-                    }
 
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                        ) {
+                            Text(
+                                text = item.lastInteractionDate,
+                                textAlign = TextAlign.Right
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .padding(top = 4.dp),
+                                text = item.lastInteractionHour,
+                                textAlign = TextAlign.Right
+                            )
+                        }
+                    }
                 }
 
                 Divider(color = Color.Black, thickness = 1.dp)
