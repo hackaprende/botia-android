@@ -23,11 +23,12 @@ interface SessionManager {
 val USER_ID_KEY = intPreferencesKey("user_id")
 val USER_TOKEN_KEY = stringPreferencesKey("user_auth_token")
 val USER_EMAIL_KEY = stringPreferencesKey("user_email")
+
+private val Context.dataStore: DataStore<Preferences> by
+preferencesDataStore(name = "user_settings")
 class SessionManagerImpl@Inject constructor(
     @ApplicationContext context: Context) : SessionManager {
 
-    private val Context.dataStore: DataStore<Preferences> by
-    preferencesDataStore(name = "user_settings")
     private val dataStore = context.dataStore
     override suspend fun storeUser(user: User) {
         dataStore.edit {
