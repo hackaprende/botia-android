@@ -1,5 +1,7 @@
 package com.epsilon.botia.customers.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -154,10 +156,21 @@ private fun CustomerList(
                 Row(
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 16.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .background(
+                            color = if (item.needCustomAttention) {
+                                Color.Cyan
+                            } else {
+                                Color.White
+                            }
+                        ).clickable {
+                            onCustomerSelected(item)
+                        },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Switch(
+                        modifier = Modifier
+                            .padding(8.dp),
                         checked = item.isBotEnabled,
                         onCheckedChange = {
                             onEnableBotSwitchClick(item)
@@ -166,16 +179,14 @@ private fun CustomerList(
 
                     Row(
                         modifier = Modifier
-                            .padding(start = 16.dp)
+                            .padding(8.dp)
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        ClickableText(
+                        Text(
                             text = AnnotatedString(text = item.phoneNumber),
-                            onClick = {
-                                onCustomerSelected(item)
-                            },
+                            color = Color.Black,
                             style = TextStyle(
                                 fontSize = 16.sp
                             )
@@ -186,13 +197,15 @@ private fun CustomerList(
                         ) {
                             Text(
                                 text = item.lastInteractionDate,
-                                textAlign = TextAlign.Right
+                                textAlign = TextAlign.Right,
+                                color = Color.Black
                             )
                             Text(
                                 modifier = Modifier
                                     .padding(top = 4.dp),
                                 text = item.lastInteractionHour,
-                                textAlign = TextAlign.Right
+                                textAlign = TextAlign.Right,
+                                color = Color.Black
                             )
                         }
                     }

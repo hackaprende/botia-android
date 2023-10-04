@@ -11,6 +11,7 @@ class CustomerDTOMapper {
             customerDTO.phoneNumber,
             customerDTO.lastInteractionTimestamp,
             customerDTO.isBotEnabled,
+            customerDTO.needCustomAttention,
         )
 
     fun fromCustomerDTOListToCustomerDomainList(customerDTOList: List<CustomerDTO>) =
