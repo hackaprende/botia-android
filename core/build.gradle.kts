@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.hackaprende.botia.core"
+    namespace = "com.epsilon.botia.core"
     compileSdk = 33
 
     defaultConfig {

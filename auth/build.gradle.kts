@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.hackaprende.botia.auth"
+    namespace = "com.epsilon.botia.auth"
     compileSdk = 33
 
     defaultConfig {

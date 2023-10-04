@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.hackaprende.botia"
+    namespace = "com.epsilon.botia"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.hackaprende.botia"
+        applicationId = "com.epsilon.botia"
         minSdk = 28
         targetSdk = 33
         versionCode = 1

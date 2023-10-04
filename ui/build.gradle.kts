@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.hackaprende.botia.ui"
+    namespace = "com.epsilon.botia.ui"
     compileSdk = 33
 
     defaultConfig {
