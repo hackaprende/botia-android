@@ -10,6 +10,9 @@ import com.epsilon.botia.customers.model.Customer
 import com.epsilon.botia.customers.repository.CompanyRepository
 import com.epsilon.botia.customers.repository.CustomerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -40,27 +43,32 @@ class CustomersViewModel @Inject constructor(
     private val stateFlow = MutableStateFlow(initialState)
     val state = stateFlow.asStateFlow()
 
+    private var job = Job()
+    private val backgroundScope = CoroutineScope(Dispatchers.IO + job)
+
     init {
         isUserLoggedIn()
     }
 
     fun toggleNeedCustomAttentionForCustomer(customer: Customer) {
         if (customer.needCustomAttention) {
+            // We need to process the result on a backgroundScope to run it when Whatsapp is opened
+            // and the app goes to background.
             customerRepository
                 .turnOffNeedCustomerAttentionForCustomer(customer.id)
-                .onEach(::handleToggleBotEnabledForCustomerResponse)
-                .launchIn(viewModelScope)
+                .onEach(::handleCustomerUpdatedResult)
+                .launchIn(backgroundScope)
         }
     }
 
     fun toggleBotEnabledForCustomer(customer: Customer) {
         customerRepository
             .toggleBotEnabledForCustomer(customer.id, !customer.isBotEnabled)
-            .onEach(::handleToggleBotEnabledForCustomerResponse)
+            .onEach(::handleCustomerUpdatedResult)
             .launchIn(viewModelScope)
     }
 
-    private suspend fun handleToggleBotEnabledForCustomerResponse(
+    private suspend fun handleCustomerUpdatedResult(
         apiResponseStatus: ApiResponseStatus<Unit>
     ) {
         if (apiResponseStatus is ApiResponseStatus.Success) {
