@@ -33,14 +33,15 @@ class CustomersActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column {
-                        CustomersScreen(logoutUser = {
-                            openAuthActivity()
-                        }, onCustomerSelected = {
-                            val url = "$WHATSAPP_URL${it.phoneNumber}"
-                            val i = Intent(Intent.ACTION_VIEW)
-                            i.data = Uri.parse(url)
-                            startActivity(i)
-                        }
+                        CustomersScreen(
+                            logoutUser = {
+                                openAuthActivity()
+                            }, onCustomerSelected = {
+                                val url = "$WHATSAPP_URL${it.phoneNumber}"
+                                val i = Intent(Intent.ACTION_VIEW)
+                                i.data = Uri.parse(url)
+                                startActivity(i)
+                            }
                         )
                     }
                 }

@@ -79,7 +79,10 @@ fun CustomersScreen(
                         customersViewModel.toggleBotEnabledForCustomer(customer)
                     }
                 },
-                onCustomerSelected = onCustomerSelected,
+                onCustomerSelected = { customer ->
+                    customersViewModel.toggleNeedCustomAttentionForCustomer(customer)
+                    onCustomerSelected(customer)
+                },
             )
 
             if (status is ApiResponseStatus.Loading) {
@@ -163,7 +166,8 @@ private fun CustomerList(
                             } else {
                                 Color.White
                             }
-                        ).clickable {
+                        )
+                        .clickable {
                             onCustomerSelected(item)
                         },
                     verticalAlignment = Alignment.CenterVertically,

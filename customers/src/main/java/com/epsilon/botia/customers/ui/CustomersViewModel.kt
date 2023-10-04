@@ -44,6 +44,15 @@ class CustomersViewModel @Inject constructor(
         isUserLoggedIn()
     }
 
+    fun toggleNeedCustomAttentionForCustomer(customer: Customer) {
+        if (customer.needCustomAttention) {
+            customerRepository
+                .turnOffNeedCustomerAttentionForCustomer(customer.id)
+                .onEach(::handleToggleBotEnabledForCustomerResponse)
+                .launchIn(viewModelScope)
+        }
+    }
+
     fun toggleBotEnabledForCustomer(customer: Customer) {
         customerRepository
             .toggleBotEnabledForCustomer(customer.id, !customer.isBotEnabled)
