@@ -16,6 +16,8 @@ import javax.inject.Inject
 interface SessionManager {
     suspend fun storeUser(user: User)
 
+    suspend fun logout()
+
     fun userTokenFlow(): Flow<String>
     fun userIdFlow(): Flow<Int>
 }
@@ -35,6 +37,14 @@ class SessionManagerImpl@Inject constructor(
             it[USER_ID_KEY] = user.id
             it[USER_TOKEN_KEY] = user.authenticationToken
             it[USER_EMAIL_KEY] = user.email
+        }
+    }
+
+    override suspend fun logout() {
+        dataStore.edit {
+            it[USER_ID_KEY] = -1
+            it[USER_TOKEN_KEY] = ""
+            it[USER_EMAIL_KEY] = ""
         }
     }
 

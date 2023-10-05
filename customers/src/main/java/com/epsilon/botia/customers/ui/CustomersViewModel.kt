@@ -68,6 +68,17 @@ class CustomersViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    fun logout() {
+        viewModelScope.launch {
+            sessionManager.logout()
+            stateFlow.emit(
+                state.value.copy(
+                    isUserLoggedIn = false
+                )
+            )
+        }
+    }
+
     private suspend fun handleCustomerUpdatedResult(
         apiResponseStatus: ApiResponseStatus<Unit>
     ) {
