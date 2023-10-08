@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.epsilon.botia.auth"
+    namespace = "app.botia.android.auth"
     compileSdk = 33
 
     defaultConfig {

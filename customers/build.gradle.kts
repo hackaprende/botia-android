@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.epsilon.botia.customers"
+    namespace = "app.botia.android.customers"
     compileSdk = 33
 
     defaultConfig {

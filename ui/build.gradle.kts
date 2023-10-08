@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.epsilon.botia.ui"
+    namespace = "app.botia.android.ui"
     compileSdk = 33
 
     defaultConfig {

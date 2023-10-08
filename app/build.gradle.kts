@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.epsilon.botia"
+    namespace = "app.botia.android"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.epsilon.botia"
+        applicationId = "app.botia.android"
         minSdk = 28
         targetSdk = 33
         versionCode = 1
