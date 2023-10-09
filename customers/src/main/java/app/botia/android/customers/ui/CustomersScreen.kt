@@ -55,6 +55,7 @@ import app.botia.android.ui.LoadingWheel
 @Composable
 fun CustomersScreen(
     logoutUser: () -> Unit,
+    setupFirebaseNotifications: () -> Unit,
     onCustomerSelected: (Customer) -> Unit,
     customersViewModel: CustomersViewModel = hiltViewModel()
 ) {
@@ -63,64 +64,72 @@ fun CustomersScreen(
     val customers = state.customers
     val status = state.status
     val customerToBeDisabled = remember { mutableStateOf<Customer?>(null) }
+    val askedForNotificationPermission = remember { mutableStateOf(false) }
 
-    if (!isUserLoggedIn) {
-        logoutUser()
-    }
+    if (isUserLoggedIn != null) {
+        if (isUserLoggedIn) {
+            if (!askedForNotificationPermission.value) {
+                askedForNotificationPermission.value = true
+                setupFirebaseNotifications()
+            }
 
-    Scaffold(
-        topBar = {
-            CustomersScreenTopBar(
-                onLogoutClick = {
-                    customersViewModel.logout()
+            Scaffold(
+                topBar = {
+                    CustomersScreenTopBar(
+                        onLogoutClick = {
+                            customersViewModel.logout()
+                        }
+                    )
                 }
-            )
-        }
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-        ) {
-            CustomerList(
-                modifier = Modifier.padding(it),
-                customers = customers,
-                onEnableBotSwitchClick = {
-                        customer ->
-                    if (customer.isBotEnabled) {
-                        customerToBeDisabled.value = customer
-                    } else {
-                        customersViewModel.toggleBotEnabledForCustomer(customer)
-                    }
-                },
-                onCustomerSelected = { customer ->
-                    customersViewModel.toggleNeedCustomAttentionForCustomer(customer)
-                    onCustomerSelected(customer)
-                },
-            )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                ) {
+                    CustomerList(
+                        modifier = Modifier.padding(it),
+                        customers = customers,
+                        onEnableBotSwitchClick = {
+                                customer ->
+                            if (customer.isBotEnabled) {
+                                customerToBeDisabled.value = customer
+                            } else {
+                                customersViewModel.toggleBotEnabledForCustomer(customer)
+                            }
+                        },
+                        onCustomerSelected = { customer ->
+                            customersViewModel.toggleNeedCustomAttentionForCustomer(customer)
+                            onCustomerSelected(customer)
+                        },
+                    )
 
-            if (status is ApiResponseStatus.Loading) {
-                LoadingWheel()
-            } else if (status is ApiResponseStatus.Error) {
-                ErrorDialog(
-                    message = status.message,
-                    onDialogDismiss = {
-                        customersViewModel.resetApiResponseStatus()
-                    },
-                )
-            }
-
-            val customerToBeDisabledValue = customerToBeDisabled.value
-            if (customerToBeDisabledValue != null) {
-                DisableBotDialog(
-                    onAccept = {
-                        customersViewModel.toggleBotEnabledForCustomer(customerToBeDisabledValue)
-                        customerToBeDisabled.value = null
-                    },
-                    onCancel = {
-                        customerToBeDisabled.value = null
+                    if (status is ApiResponseStatus.Loading) {
+                        LoadingWheel()
+                    } else if (status is ApiResponseStatus.Error) {
+                        ErrorDialog(
+                            message = status.message,
+                            onDialogDismiss = {
+                                customersViewModel.resetApiResponseStatus()
+                            },
+                        )
                     }
-                )
+
+                    val customerToBeDisabledValue = customerToBeDisabled.value
+                    if (customerToBeDisabledValue != null) {
+                        DisableBotDialog(
+                            onAccept = {
+                                customersViewModel.toggleBotEnabledForCustomer(customerToBeDisabledValue)
+                                customerToBeDisabled.value = null
+                            },
+                            onCancel = {
+                                customerToBeDisabled.value = null
+                            }
+                        )
+                    }
+                }
             }
+        } else {
+            logoutUser()
         }
     }
 }

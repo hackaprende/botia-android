@@ -22,14 +22,14 @@ import javax.inject.Inject
 
 data class CustomersScreenState(
     val status: ApiResponseStatus<Any?>,
-    val isUserLoggedIn: Boolean,
+    val isUserLoggedIn: Boolean?,
     val company: Company?,
     val customers: List<Customer>
 )
 
 private val initialState = CustomersScreenState(
     status = ApiResponseStatus.None(),
-    isUserLoggedIn = true,
+    isUserLoggedIn = null,
     company = null,
     customers = listOf(),
 )

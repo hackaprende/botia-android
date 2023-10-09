@@ -4,4 +4,10 @@
     <string name="logout">Logout</string>
     <string name="bot_will_be_disabled_alert_title">Botia will be disabled for customer.</string>
     <string name="bot_will_be_disabled_alert_message">Botia will not answer automatically for this customer until you enable it again.</string>
+    <string name="notifications_permission_dialog_title">Allow permission to get notifications.</string>
+    <string name="notifications_permission_dialog_message">Botia app needs this permission to show notifications, if allowed, you are going to receive notifications when a customer needs personal assistance or any other important events.</string>
+    <string name="allow">Allow</string>
+    <string name="no">No</string>
+    <string name="app_not_showing_notifications_dialog_title">App is not showing notification</string>
+    <string name="app_not_showing_notifications_dialog_message">You opted not to get notifications, we encourage you to allow notifications to get Botia full potential, like being notified when a customer needs personal assistance. Click ok button to go to notifications settings.</string>
 </resources>
