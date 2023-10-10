@@ -13,12 +13,17 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import app.botia.android.core.NOTIFICATION_ACTION_CUSTOMER_NEED_HELP
+import app.botia.android.core.NOTIFICATION_ACTION_KEY
+import app.botia.android.core.NOTIFICATION_CUSTOMER_ID_KEY
+import app.botia.android.core.NOTIFICATION_CUSTOMER_PHONE_KEY
 import app.botia.android.customers.R
 import app.botia.android.customers.utils.WHATSAPP_URL
 import app.botia.android.ui.ui.theme.BotiaTheme
@@ -31,6 +36,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class CustomersActivity : ComponentActivity() {
 
     private val tag = CustomersActivity::class.java.simpleName
+    private val viewModel: CustomersViewModel by viewModels()
 
     // Launcher to request permission to show notification
     private val requestPermissionLauncher = registerForActivityResult(
@@ -62,16 +68,37 @@ class CustomersActivity : ComponentActivity() {
                             },
                             setupFirebaseNotifications = ::setupFirebaseNotifications,
                             onCustomerSelected = {
-                                val url = "$WHATSAPP_URL${it.phoneNumber}"
-                                val i = Intent(Intent.ACTION_VIEW)
-                                i.data = Uri.parse(url)
-                                startActivity(i)
+                                openWhatsappConversation(it.phoneNumber)
                             }
                         )
                     }
                 }
             }
         }
+    }
+
+    private fun handleNotificationIntent() {
+        val extras = intent.extras
+        val action = extras?.getString(NOTIFICATION_ACTION_KEY)
+        if (action != null) {
+            if (action == NOTIFICATION_ACTION_CUSTOMER_NEED_HELP) {
+                val phoneNumber = extras.getString(NOTIFICATION_CUSTOMER_PHONE_KEY)
+                val customerId = extras.getString(NOTIFICATION_CUSTOMER_ID_KEY)
+                if (customerId != null) {
+                    viewModel.toggleNeedCustomAttentionForCustomer(Integer.parseInt(customerId))
+                }
+                if (phoneNumber != null) {
+                    openWhatsappConversation(phoneNumber)
+                }
+            }
+        }
+    }
+
+    private fun openWhatsappConversation(phoneNumber: String) {
+        val url = "$WHATSAPP_URL${phoneNumber}"
+        val i = Intent(Intent.ACTION_VIEW)
+        i.data = Uri.parse(url)
+        startActivity(i)
     }
 
     private fun setupFirebaseNotifications() {
@@ -81,6 +108,7 @@ class CustomersActivity : ComponentActivity() {
                 PackageManager.PERMISSION_GRANTED
             ) {
                 retrieveFirebaseNotificationsToken()
+                handleNotificationIntent()
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
                 showPermissionRationaleNotificationDialog()
             } else {
@@ -103,10 +131,7 @@ class CustomersActivity : ComponentActivity() {
             // Get new FCM registration token
             val token = task.result
 
-            // Log and toast
-            val msg = "FCM Token added $token"
-            Log.d(tag, msg)
-            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+            // TODO - Link user to FCM device
         })
     }
 

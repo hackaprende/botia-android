@@ -50,12 +50,15 @@ class CustomersViewModel @Inject constructor(
         isUserLoggedIn()
     }
 
-    fun toggleNeedCustomAttentionForCustomer(customer: Customer) {
-        if (customer.needCustomAttention) {
+    fun toggleNeedCustomAttentionForCustomer(
+        customerId: Int,
+        customerNeedCustomAttention: Boolean = true,
+    ) {
+        if (customerNeedCustomAttention) {
             // We need to process the result on a backgroundScope to run it when Whatsapp is opened
             // and the app goes to background.
             customerRepository
-                .turnOffNeedCustomerAttentionForCustomer(customer.id)
+                .turnOffNeedCustomerAttentionForCustomer(customerId)
                 .onEach(::handleCustomerUpdatedResult)
                 .launchIn(backgroundScope)
         }

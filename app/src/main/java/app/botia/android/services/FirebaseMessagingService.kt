@@ -12,12 +12,20 @@ import androidx.core.app.NotificationCompat
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import app.botia.android.R
+import app.botia.android.core.NOTIFICATION_ACTION_CUSTOMER_NEED_HELP
+import app.botia.android.core.NOTIFICATION_ACTION_KEY
+import app.botia.android.core.NOTIFICATION_CUSTOMER_ID_KEY
+import app.botia.android.core.NOTIFICATION_CUSTOMER_PHONE_KEY
 import app.botia.android.customers.ui.CustomersActivity
 import app.botia.android.workers.FirebaseNotificationsWorker
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 class FirebaseMessagingService : FirebaseMessagingService() {
+
+    private enum class NotificationType {
+        CUSTOMER_NEED_HELP, DEFAULT
+    }
 
     companion object {
 
@@ -46,8 +54,9 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         Log.d(TAG, "From: ${remoteMessage.from}")
 
         // Check if message contains a data payload.
-        if (remoteMessage.data.isNotEmpty()) {
-            Log.d(TAG, "Message data payload: ${remoteMessage.data}")
+        val data = remoteMessage.data
+        if (data.isNotEmpty()) {
+            Log.d(TAG, "Message data payload: $data")
 
             // Check if data needs to be processed by long running job
             if (isLongRunningJob()) {
@@ -59,10 +68,34 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             }
         }
 
+        var notificationType = NotificationType.DEFAULT
+        var customerPhone: String? = null
+        var customerId: String? = null
+        var action: String? = null
+        if (data.containsKey(NOTIFICATION_ACTION_KEY)) {
+            action = data["action"]
+            if (action == NOTIFICATION_ACTION_CUSTOMER_NEED_HELP) {
+                customerPhone = data[NOTIFICATION_CUSTOMER_PHONE_KEY]
+                customerId = data[NOTIFICATION_CUSTOMER_ID_KEY]
+                notificationType = NotificationType.CUSTOMER_NEED_HELP
+            }
+        }
+
         // Check if message contains a notification payload.
         remoteMessage.notification?.let {
             Log.d(TAG, "Message Notification Body: ${it.body}")
-            it.body?.let { body -> it.title?.let { title -> sendNotification(title, body) } }
+            it.body?.let { body ->
+                it.title?.let { title ->
+                    sendNotification(
+                        title,
+                        body,
+                        notificationType,
+                        action,
+                        customerPhone,
+                        customerId,
+                    )
+                }
+            }
         }
 
         // Also if you intend on generating your own notifications as a result of a received FCM
@@ -123,10 +156,26 @@ class FirebaseMessagingService : FirebaseMessagingService() {
      *
      * @param messageBody FCM message body received.
      */
-    private fun sendNotification(messageTitle: String, messageBody: String) {
+    private fun sendNotification(
+        messageTitle: String,
+        messageBody: String,
+        notificationType: NotificationType = NotificationType.DEFAULT,
+        action: String? = null,
+        customerPhone: String? = null,
+        customerId: String? = null
+    ) {
         val requestCode = 0
         val intent = Intent(this, CustomersActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+        if (action != null) {
+            intent.putExtra(NOTIFICATION_ACTION_KEY, action)
+            if (notificationType == NotificationType.CUSTOMER_NEED_HELP) {
+                intent.putExtra(NOTIFICATION_CUSTOMER_PHONE_KEY, customerPhone)
+                intent.putExtra(NOTIFICATION_CUSTOMER_ID_KEY, customerId)
+            }
+        }
+
         val pendingIntent = PendingIntent.getActivity(
             this,
             requestCode,
@@ -151,7 +200,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             val channel = NotificationChannel(
                 channelId,
                 "Channel human readable title",
-                NotificationManager.IMPORTANCE_DEFAULT,
+                NotificationManager.IMPORTANCE_HIGH,
             )
             notificationManager.createNotificationChannel(channel)
         }

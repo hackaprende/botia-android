@@ -62,15 +62,16 @@ fun CustomersScreen(
     val state = customersViewModel.state.collectAsState().value
     val isUserLoggedIn = state.isUserLoggedIn
     val customers = state.customers
+    val company = state.company
     val status = state.status
     val customerToBeDisabled = remember { mutableStateOf<Customer?>(null) }
-    val askedForNotificationPermission = remember { mutableStateOf(false) }
+    val checkedNotification = remember { mutableStateOf(false) }
 
     if (isUserLoggedIn != null) {
         if (isUserLoggedIn) {
-            if (!askedForNotificationPermission.value) {
-                askedForNotificationPermission.value = true
+            if (company != null && !checkedNotification.value) {
                 setupFirebaseNotifications()
+                checkedNotification.value = true
             }
 
             Scaffold(
@@ -98,7 +99,10 @@ fun CustomersScreen(
                             }
                         },
                         onCustomerSelected = { customer ->
-                            customersViewModel.toggleNeedCustomAttentionForCustomer(customer)
+                            customersViewModel.toggleNeedCustomAttentionForCustomer(
+                                customer.id,
+                                customer.needCustomAttention,
+                            )
                             onCustomerSelected(customer)
                         },
                     )
