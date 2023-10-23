@@ -1,10 +1,12 @@
 package app.botia.android.customers.api.services
 
 import app.botia.android.core.COMPANY_CUSTOMERS_ENDPOINT
+import app.botia.android.core.CUSTOMER_MESSAGES_ENDPOINT
 import app.botia.android.core.UPDATE_CUSTOMER_ENDPOINT
 import app.botia.android.core.api.ApiServiceInterceptor
 import app.botia.android.customers.api.requests.ToggleBotEnabledRequest
 import app.botia.android.customers.api.requests.TurnOffNeedCustomAttentionRequest
+import app.botia.android.customers.api.responses.CustomerMessageListResponse
 import app.botia.android.customers.api.responses.CustomerResponse
 import app.botia.android.customers.api.responses.CustomersResponse
 import retrofit2.http.Body
@@ -31,4 +33,11 @@ interface CustomerApiService {
         @Path("customer_id") customerId: Int,
         @Body turnOffNeedCustomAttentionRequest: TurnOffNeedCustomAttentionRequest,
     ): CustomerResponse
+
+    @Headers("${ApiServiceInterceptor.NEEDS_AUTH_HEADER_KEY}: true")
+    @GET(CUSTOMER_MESSAGES_ENDPOINT)
+    suspend fun getCustomerMessages(
+        @Path("company_id") companyId: Int,
+        @Path("customer_id") customerId: Int,
+    ): CustomerMessageListResponse
 }

@@ -11,6 +11,7 @@ class Customer(
     private val lastInteractionTimestamp: Int,
     val isBotEnabled: Boolean,
     val needCustomAttention: Boolean,
+    val messages: List<CustomerMessage> = listOf(),
 ) : Comparable<Customer> {
     companion object {
         private const val LAST_INTERACTION_DATE_FORMAT = "yyyy-MMM-dd"

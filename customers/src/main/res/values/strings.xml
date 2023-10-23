@@ -10,4 +10,5 @@
     <string name="no">No</string>
     <string name="app_not_showing_notifications_dialog_title">App is not showing notification</string>
     <string name="app_not_showing_notifications_dialog_message">You opted not to get notifications, we encourage you to allow notifications to get Botia full potential, like being notified when a customer needs personal assistance. Click ok button to go to notifications settings.</string>
+    <string name="title_activity_customer_conversation">CustomerConversationActivity</string>
 </resources>

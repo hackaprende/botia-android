@@ -5,6 +5,7 @@ const val AUTHENTICATION_ENDPOINT = "users/api-token-auth/"
 const val USER_COMPANY_ENDPOINT = "users/user_company/"
 const val COMPANY_CUSTOMERS_ENDPOINT = "messages/company_customers/{company_id}/"
 const val UPDATE_CUSTOMER_ENDPOINT = "messages/customers/{customer_id}/"
+const val CUSTOMER_MESSAGES_ENDPOINT = "messages/customer_conversation/{company_id}/{customer_id}/"
 
 // Notification keys
 const val NOTIFICATION_ACTION_KEY = "action"

@@ -67,8 +67,8 @@ class CustomersActivity : ComponentActivity() {
                                 openAuthActivity()
                             },
                             setupFirebaseNotifications = ::setupFirebaseNotifications,
-                            onCustomerSelected = {
-                                openWhatsappConversation(it.phoneNumber)
+                            onCustomerSelected = { companyId, customerId ->
+                                openCustomerConversation(companyId, customerId)
                             }
                         )
                     }
@@ -76,6 +76,15 @@ class CustomersActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun openCustomerConversation(companyId: Int, customerId: Int) =
+        startActivity(
+            CustomerConversationActivity.makeIntent(
+                this,
+                companyId,
+                customerId
+            )
+        )
 
     private fun handleNotificationIntent() {
         val extras = intent.extras

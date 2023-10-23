@@ -56,7 +56,7 @@ import app.botia.android.ui.LoadingWheel
 fun CustomersScreen(
     logoutUser: () -> Unit,
     setupFirebaseNotifications: () -> Unit,
-    onCustomerSelected: (Customer) -> Unit,
+    onCustomerSelected: (companyId: Int, customerId: Int) -> Unit,
     customersViewModel: CustomersViewModel = hiltViewModel()
 ) {
     val state = customersViewModel.state.collectAsState().value
@@ -103,7 +103,7 @@ fun CustomersScreen(
                                 customer.id,
                                 customer.needCustomAttention,
                             )
-                            onCustomerSelected(customer)
+                            onCustomerSelected(company!!.id, customer.id)
                         },
                     )
 
