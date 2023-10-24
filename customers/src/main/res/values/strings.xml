@@ -2,6 +2,7 @@
     <string name="login_activity_not_found">There was an error logging off, please try again later</string>
     <string name="my_customers">My customers</string>
     <string name="logout">Logout</string>
+    <string name="back">Back</string>
     <string name="bot_will_be_disabled_alert_title">Botia will be disabled for customer.</string>
     <string name="bot_will_be_disabled_alert_message">Botia will not answer automatically for this customer until you enable it again.</string>
     <string name="notifications_permission_dialog_title">Allow permission to get notifications.</string>

@@ -2,4 +2,5 @@
 <resources>
     <string name="try_again">Try again</string>
     <string name="error_dialog_title">There was an error</string>
+    <string name="back">Back</string>
 </resources>

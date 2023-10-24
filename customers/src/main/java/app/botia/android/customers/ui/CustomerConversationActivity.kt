@@ -38,7 +38,11 @@ class CustomerConversationActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CustomerConversationScreen()
+                    CustomerConversationScreen(
+                        onBackButtonClick = {
+                            onBackPressedDispatcher.onBackPressed()
+                        }
+                    )
                 }
             }
         }

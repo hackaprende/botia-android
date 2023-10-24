@@ -14,6 +14,7 @@ class CustomerMessageDTOMapper {
             customerMessageDTO.messagingProduct,
             customerMessageDTO.functionName,
             customerMessageDTO.functionCall,
+            customerMessageDTO.sender
         )
 
     fun fromCustomerDTOListToCustomerDomainList(customerMessageDTOList: List<CustomerMessageDTO>) =
