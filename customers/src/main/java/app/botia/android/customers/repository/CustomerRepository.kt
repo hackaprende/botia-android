@@ -3,12 +3,13 @@ package app.botia.android.customers.repository
 import app.botia.android.core.api.ApiResponseStatus
 import app.botia.android.core.api.Network
 import app.botia.android.customers.api.mappers.CustomerDTOMapper
-import app.botia.android.customers.api.mappers.CustomerMessageDTOMapper
+import app.botia.android.customers.api.mappers.SendMessageErrorMapper
+import app.botia.android.customers.api.requests.SendMessageToCustomerRequest
 import app.botia.android.customers.api.requests.ToggleBotEnabledRequest
 import app.botia.android.customers.api.requests.TurnOffNeedCustomAttentionRequest
 import app.botia.android.customers.api.services.CustomerApiService
 import app.botia.android.customers.model.Customer
-import app.botia.android.customers.model.CustomerMessage
+import app.botia.android.customers.model.SendMessageError
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -23,6 +24,12 @@ interface CustomerRepository {
 
     fun getCustomerConversation(companyId: Int, customerId: Int):
             Flow<ApiResponseStatus<Customer>>
+
+    fun sendMessageToCustomer(
+        companyId: Int,
+        customerId: Int,
+        messageToSend: String,
+    ): Flow<ApiResponseStatus<SendMessageError?>>
 }
 
 class CustomerRepositoryImpl @Inject constructor(
@@ -89,5 +96,27 @@ class CustomerRepositoryImpl @Inject constructor(
             val customerDTO = customerMessagesResponse.customer
             val customerDTOMapper = CustomerDTOMapper()
             customerDTOMapper.fromCustomerDTOToCustomerDomain(customerDTO, customerMessageDTOList)
+        }
+
+    override fun sendMessageToCustomer(
+        companyId: Int,
+        customerId: Int,
+        messageToSend: String,
+    ): Flow<ApiResponseStatus<SendMessageError?>> =
+        network.makeNetworkCall {
+            val sendMessageToCustomerRequest =
+                SendMessageToCustomerRequest(companyId, customerId, messageToSend)
+            val response = customerApiService.sendMessageToCustomer(
+                sendMessageToCustomerRequest = sendMessageToCustomerRequest
+            )
+
+            val status = response.status
+            var error: SendMessageError? = null
+            if (status == "error_sending_message") {
+                val sendMessageErrorMapper = SendMessageErrorMapper()
+                error = sendMessageErrorMapper.fromSendMessageErrorDTOToDomain(response.error)
+            }
+
+            return@makeNetworkCall error
         }
 }

@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.botia.android.core.api.ApiResponseStatus
 import app.botia.android.customers.model.Customer
-import app.botia.android.customers.model.CustomerMessage
 import app.botia.android.customers.repository.CustomerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
