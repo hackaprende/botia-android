@@ -1,5 +1,8 @@
 package app.botia.android.customers.model
 
+import app.botia.android.customers.utils.LAST_INTERACTION_DATE_FORMAT
+import app.botia.android.customers.utils.LAST_INTERACTION_HOUR_FORMAT
+import app.botia.android.customers.utils.getTimeWithFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -13,20 +16,16 @@ class Customer(
     val needCustomAttention: Boolean,
     val messages: List<CustomerMessage> = listOf(),
 ) : Comparable<Customer> {
-    companion object {
-        private const val LAST_INTERACTION_DATE_FORMAT = "yyyy-MMM-dd"
-        private const val LAST_INTERACTION_HOUR_FORMAT = "hh:mm aa"
-    }
 
-    val lastInteractionDate = getTimeWithFormat(LAST_INTERACTION_DATE_FORMAT)
-    val lastInteractionHour = getTimeWithFormat(LAST_INTERACTION_HOUR_FORMAT)
+    val lastInteractionDate = getTimeWithFormat(
+        LAST_INTERACTION_DATE_FORMAT,
+        lastInteractionTimestamp,
+    )
 
-    private fun getTimeWithFormat(format: String): String {
-        val simpleDateFormat = SimpleDateFormat(format, Locale.getDefault())
-        val timestampInMillis = lastInteractionTimestamp.toLong() * 1000
-        val date = Date(timestampInMillis)
-        return simpleDateFormat.format(date)
-    }
+    val lastInteractionHour = getTimeWithFormat(
+        LAST_INTERACTION_HOUR_FORMAT,
+        lastInteractionTimestamp,
+    )
 
     override fun compareTo(other: Customer) =
         if (lastInteractionTimestamp >= other.lastInteractionTimestamp) -1 else 1

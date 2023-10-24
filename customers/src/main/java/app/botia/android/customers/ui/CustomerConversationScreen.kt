@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +26,7 @@ import app.botia.android.customers.model.CustomerMessage
 import app.botia.android.ui.ErrorDialog
 import app.botia.android.ui.LoadingWheel
 import app.botia.android.ui.WhiteTopAppBar
+import java.util.Collections
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +39,7 @@ fun CustomerConversationScreen(
     val status = state.status
     val customer = state.customer
     val customerMessages = customer?.messages ?: listOf()
+    Collections.sort(customerMessages)
 
     Scaffold(
         topBar = {
@@ -95,28 +98,47 @@ fun CustomerMessageList(
                                 modifier = modifier
                                 .fillMaxWidth()
                             ) {
-                                CustomerMessageText(modifier, item.customerAnswer)
+                                MessageText(
+                                    modifier = modifier,
+                                    textAlignment = Alignment.End,
+                                    text = item.customerAnswer,
+                                    date = item.lastInteractionDate,
+                                    hour = item.lastInteractionHour,
+                                )
 
                                 Spacer(
                                     modifier = modifier
                                         .padding(top = 8.dp, bottom = 8.dp)
                                 )
 
-                                Text(
-                                    modifier = modifier
-                                        .fillMaxWidth(),
+                                MessageText(
+                                    modifier = modifier,
+                                    textAlignment = Alignment.Start,
                                     text = item.userAnswer,
-                                    textAlign = TextAlign.Left
+                                    date = item.lastInteractionDate,
+                                    hour = item.lastInteractionHour,
                                 )
                             }
                         }
 
                         CustomerMessage.SENDER_CUSTOMER -> {
-                            CustomerMessageText(modifier, item.customerAnswer)
+                            MessageText(
+                                modifier = modifier,
+                                textAlignment = Alignment.End,
+                                text = item.customerAnswer,
+                                date = item.lastInteractionDate,
+                                hour = item.lastInteractionHour,
+                            )
                         }
 
                         CustomerMessage.SENDER_USER -> {
-                            Text(text = item.userAnswer)
+                            MessageText(
+                                modifier = modifier,
+                                textAlignment = Alignment.Start,
+                                text = item.userAnswer,
+                                date = item.lastInteractionDate,
+                                hour = item.lastInteractionHour,
+                            )
                         }
                     }
                 }
@@ -126,16 +148,24 @@ fun CustomerMessageList(
 }
 
 @Composable
-private fun CustomerMessageText(
+private fun MessageText(
     modifier: Modifier = Modifier,
+    textAlignment: Alignment.Horizontal,
     text: String,
+    date: String,
+    hour: String,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth(),
-        horizontalAlignment = Alignment.End
+        horizontalAlignment = textAlignment,
     ) {
         Text(text = text)
+        Row {
+            Text(text = date)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = hour)
+        }
     }
 }
 
