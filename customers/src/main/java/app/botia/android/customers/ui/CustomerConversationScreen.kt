@@ -7,26 +7,34 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.botia.android.core.api.ApiResponseStatus
+import app.botia.android.customers.R
 import app.botia.android.customers.model.Customer
 import app.botia.android.customers.model.CustomerMessage
 import app.botia.android.ui.ErrorDialog
 import app.botia.android.ui.LoadingWheel
 import app.botia.android.ui.WhiteTopAppBar
-import java.util.Collections
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +47,7 @@ fun CustomerConversationScreen(
     val status = state.status
     val customer = state.customer
     val customerMessages = customer?.messages ?: listOf()
-    Collections.sort(customerMessages)
+    val messageToSend = remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -49,24 +57,57 @@ fun CustomerConversationScreen(
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-        ) {
-            CustomerMessageList(
-                customerMessages = customerMessages
-            )
-
-            if (status is ApiResponseStatus.Loading) {
-                LoadingWheel()
-            } else if (status is ApiResponseStatus.Error) {
-                ErrorDialog(
-                    message = status.message,
-                    onDialogDismiss = {
-                        customerConversationViewModel.resetApiResponseStatus()
-                    },
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .padding(paddingValues),
+            ) {
+                CustomerMessageList(
+                    customerMessages = customerMessages
                 )
+
+                if (status is ApiResponseStatus.Loading) {
+                    LoadingWheel()
+                } else if (status is ApiResponseStatus.Error) {
+                    ErrorDialog(
+                        message = status.message,
+                        onDialogDismiss = {
+                            customerConversationViewModel.resetApiResponseStatus()
+                        },
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextField(
+                    modifier = Modifier
+                        .weight(1f),
+                    value = messageToSend.value,
+                    onValueChange = { newText ->
+                        messageToSend.value = newText
+                    },
+                    placeholder = {
+                        Text(text = stringResource(id = R.string.message))
+                    }
+                )
+                IconButton(onClick = {
+                    // TODO - Send message
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Send,
+                        contentDescription = stringResource(id = R.string.send),
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(start = 8.dp)
+                    )
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ import app.botia.android.customers.utils.LAST_INTERACTION_DATE_FORMAT
 import app.botia.android.customers.utils.LAST_INTERACTION_HOUR_FORMAT
 import app.botia.android.customers.utils.getTimeWithFormat
 import java.text.SimpleDateFormat
+import java.util.Collections
 import java.util.Date
 import java.util.Locale
 
@@ -16,6 +17,10 @@ class Customer(
     val needCustomAttention: Boolean,
     val messages: List<CustomerMessage> = listOf(),
 ) : Comparable<Customer> {
+
+    init {
+        Collections.sort(messages)
+    }
 
     val lastInteractionDate = getTimeWithFormat(
         LAST_INTERACTION_DATE_FORMAT,
