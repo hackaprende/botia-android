@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,7 +22,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,6 +39,7 @@ import app.botia.android.customers.model.CustomerMessage
 import app.botia.android.ui.ErrorDialog
 import app.botia.android.ui.LoadingWheel
 import app.botia.android.ui.WhiteTopAppBar
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,8 +51,8 @@ fun CustomerConversationScreen(
     val state = customerConversationViewModel.state.collectAsState().value
     val status = state.status
     val customer = state.customer
+    val messageToSend = state.messageToSend
     val customerMessages = customer?.messages ?: listOf()
-    val messageToSend = remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -71,8 +76,15 @@ fun CustomerConversationScreen(
                 if (status is ApiResponseStatus.Loading) {
                     LoadingWheel()
                 } else if (status is ApiResponseStatus.Error) {
+                    val errorMessage = when (val message = status.message) {
+                        FACEBOOK_EXPIRED_TOKEN_ERROR ->
+                            stringResource(R.string.facebook_token_expired_error)
+                        SEND_MESSAGE_GENERIC_ERROR ->
+                            stringResource(R.string.send_message_generic_error)
+                        else -> message
+                    }
                     ErrorDialog(
-                        message = status.message,
+                        message = errorMessage,
                         onDialogDismiss = {
                             customerConversationViewModel.resetApiResponseStatus()
                         },
@@ -89,17 +101,20 @@ fun CustomerConversationScreen(
                 TextField(
                     modifier = Modifier
                         .weight(1f),
-                    value = messageToSend.value,
+                    value = messageToSend,
                     onValueChange = { newText ->
-                        messageToSend.value = newText
+                        customerConversationViewModel.updateMessageToSend(newText)
                     },
                     placeholder = {
                         Text(text = stringResource(id = R.string.message))
                     }
                 )
-                IconButton(onClick = {
-                    // TODO - Send message
-                }) {
+                IconButton(
+                    enabled = !messageToSend.isNullOrEmpty(),
+                    onClick = {
+                        customerConversationViewModel.sendMessageToCustomer()
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Send,
                         contentDescription = stringResource(id = R.string.send),
@@ -118,10 +133,16 @@ fun CustomerMessageList(
     modifier: Modifier = Modifier,
     customerMessages: List<CustomerMessage>,
 ) {
+    val scrollState = rememberLazyListState()
+    val totalMessages = customerMessages.size
+    LaunchedEffect(totalMessages) {
+        scrollState.scrollToItem(totalMessages)
+    }
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
+        state = scrollState,
     ) {
         itemsIndexed(
             items = customerMessages,
@@ -141,7 +162,7 @@ fun CustomerMessageList(
                             ) {
                                 MessageText(
                                     modifier = modifier,
-                                    textAlignment = Alignment.End,
+                                    textAlignment = Alignment.Start,
                                     text = item.customerAnswer,
                                     date = item.lastInteractionDate,
                                     hour = item.lastInteractionHour,
@@ -154,7 +175,7 @@ fun CustomerMessageList(
 
                                 MessageText(
                                     modifier = modifier,
-                                    textAlignment = Alignment.Start,
+                                    textAlignment = Alignment.End,
                                     text = item.userAnswer,
                                     date = item.lastInteractionDate,
                                     hour = item.lastInteractionHour,
@@ -165,7 +186,7 @@ fun CustomerMessageList(
                         CustomerMessage.SENDER_CUSTOMER -> {
                             MessageText(
                                 modifier = modifier,
-                                textAlignment = Alignment.End,
+                                textAlignment = Alignment.Start,
                                 text = item.customerAnswer,
                                 date = item.lastInteractionDate,
                                 hour = item.lastInteractionHour,
@@ -175,7 +196,7 @@ fun CustomerMessageList(
                         CustomerMessage.SENDER_USER -> {
                             MessageText(
                                 modifier = modifier,
-                                textAlignment = Alignment.Start,
+                                textAlignment = Alignment.End,
                                 text = item.userAnswer,
                                 date = item.lastInteractionDate,
                                 hour = item.lastInteractionHour,

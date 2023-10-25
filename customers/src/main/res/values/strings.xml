@@ -14,4 +14,6 @@
     <string name="title_activity_customer_conversation">CustomerConversationActivity</string>
     <string name="message">Message</string>
     <string name="send">Send</string>
+    <string name="facebook_token_expired_error">There has been an error sending message, please contact support.</string>
+    <string name="send_message_generic_error">Error sending message, please try again.</string>
 </resources>

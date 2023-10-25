@@ -6,6 +6,7 @@ const val USER_COMPANY_ENDPOINT = "users/user_company/"
 const val COMPANY_CUSTOMERS_ENDPOINT = "messages/company_customers/{company_id}/"
 const val UPDATE_CUSTOMER_ENDPOINT = "messages/customers/{customer_id}/"
 const val CUSTOMER_MESSAGES_ENDPOINT = "messages/customer_conversation/{company_id}/{customer_id}/"
+const val SEND_MESSAGE_TO_CUSTOMER_ENDPOINT = "messages/send_message_to_customer/"
 
 // Notification keys
 const val NOTIFICATION_ACTION_KEY = "action"

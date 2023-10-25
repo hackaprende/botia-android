@@ -10,6 +10,7 @@ import app.botia.android.customers.api.requests.TurnOffNeedCustomAttentionReques
 import app.botia.android.customers.api.services.CustomerApiService
 import app.botia.android.customers.model.Customer
 import app.botia.android.customers.model.SendMessageError
+import app.botia.android.customers.model.SendMessageResult
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -29,7 +30,7 @@ interface CustomerRepository {
         companyId: Int,
         customerId: Int,
         messageToSend: String,
-    ): Flow<ApiResponseStatus<SendMessageError?>>
+    ): Flow<ApiResponseStatus<SendMessageResult>>
 }
 
 class CustomerRepositoryImpl @Inject constructor(
@@ -102,7 +103,7 @@ class CustomerRepositoryImpl @Inject constructor(
         companyId: Int,
         customerId: Int,
         messageToSend: String,
-    ): Flow<ApiResponseStatus<SendMessageError?>> =
+    ): Flow<ApiResponseStatus<SendMessageResult>> =
         network.makeNetworkCall {
             val sendMessageToCustomerRequest =
                 SendMessageToCustomerRequest(companyId, customerId, messageToSend)
@@ -117,6 +118,6 @@ class CustomerRepositoryImpl @Inject constructor(
                 error = sendMessageErrorMapper.fromSendMessageErrorDTOToDomain(response.error)
             }
 
-            return@makeNetworkCall error
+            return@makeNetworkCall SendMessageResult(error)
         }
 }

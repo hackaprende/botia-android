@@ -2,6 +2,7 @@ package app.botia.android.customers.api.services
 
 import app.botia.android.core.COMPANY_CUSTOMERS_ENDPOINT
 import app.botia.android.core.CUSTOMER_MESSAGES_ENDPOINT
+import app.botia.android.core.SEND_MESSAGE_TO_CUSTOMER_ENDPOINT
 import app.botia.android.core.UPDATE_CUSTOMER_ENDPOINT
 import app.botia.android.core.api.ApiServiceInterceptor
 import app.botia.android.customers.api.requests.SendMessageToCustomerRequest
@@ -45,7 +46,7 @@ interface CustomerApiService {
     ): CustomerMessageListResponse
 
     @Headers("${ApiServiceInterceptor.NEEDS_AUTH_HEADER_KEY}: true")
-    @POST(CUSTOMER_MESSAGES_ENDPOINT)
+    @POST(SEND_MESSAGE_TO_CUSTOMER_ENDPOINT)
     suspend fun sendMessageToCustomer(
         @Body sendMessageToCustomerRequest: SendMessageToCustomerRequest
     ): SendMessageToCustomerResponse
