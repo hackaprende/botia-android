@@ -3,6 +3,7 @@ package app.botia.android.customers.api.services
 import app.botia.android.core.COMPANY_CUSTOMERS_ENDPOINT
 import app.botia.android.core.CUSTOMER_MESSAGES_ENDPOINT
 import app.botia.android.core.SEND_MESSAGE_TO_CUSTOMER_ENDPOINT
+import app.botia.android.core.SEND_START_CONVERSATION_TEMPLATE_TO_CUSTOMER_ENDPOINT
 import app.botia.android.core.UPDATE_CUSTOMER_ENDPOINT
 import app.botia.android.core.api.ApiServiceInterceptor
 import app.botia.android.customers.api.requests.SendMessageToCustomerRequest
@@ -48,6 +49,12 @@ interface CustomerApiService {
     @Headers("${ApiServiceInterceptor.NEEDS_AUTH_HEADER_KEY}: true")
     @POST(SEND_MESSAGE_TO_CUSTOMER_ENDPOINT)
     suspend fun sendMessageToCustomer(
+        @Body sendMessageToCustomerRequest: SendMessageToCustomerRequest
+    ): SendMessageToCustomerResponse
+
+    @Headers("${ApiServiceInterceptor.NEEDS_AUTH_HEADER_KEY}: true")
+    @POST(SEND_START_CONVERSATION_TEMPLATE_TO_CUSTOMER_ENDPOINT)
+    suspend fun sendStartConversationTemplateToCustomer(
         @Body sendMessageToCustomerRequest: SendMessageToCustomerRequest
     ): SendMessageToCustomerResponse
 }

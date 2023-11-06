@@ -21,6 +21,7 @@ data class CustomerConversationScreenState(
     val customer: Customer?,
     val sendMessageError: SendMessageError?,
     val messageToSend: String,
+    val lastInteractionOlderThanOneDay: Boolean,
 )
 
 private val initialState = CustomerConversationScreenState(
@@ -28,6 +29,7 @@ private val initialState = CustomerConversationScreenState(
     customer = null,
     sendMessageError = null,
     messageToSend = "",
+    lastInteractionOlderThanOneDay = true,
 )
 
 private const val ERROR_SENDING_MESSAGE_EXPIRED_TOKEN_CODE = 190
@@ -51,10 +53,21 @@ class CustomerConversationViewModel @Inject constructor(
     }
 
     fun sendMessageToCustomer() {
-        customerRepository
-            .sendMessageToCustomer(companyId, customerId, state.value.messageToSend)
-            .onEach(::handleSendMessageResponse)
-            .launchIn(viewModelScope)
+        if (state.value.lastInteractionOlderThanOneDay) {
+            customerRepository
+                .sendStartConversationTemplateToCustomer(
+                    companyId,
+                    customerId,
+                    state.value.messageToSend
+                )
+                .onEach(::handleSendMessageResponse)
+                .launchIn(viewModelScope)
+        } else {
+            customerRepository
+                .sendMessageToCustomer(companyId, customerId, state.value.messageToSend)
+                .onEach(::handleSendMessageResponse)
+                .launchIn(viewModelScope)
+        }
     }
 
     fun updateMessageToSend(messageToSend: String) {
@@ -110,9 +123,11 @@ class CustomerConversationViewModel @Inject constructor(
         customerConversationResponseStatus: ApiResponseStatus<Customer>
     ) {
         val newState = if (customerConversationResponseStatus is ApiResponseStatus.Success) {
+            val customer = customerConversationResponseStatus.data
             state.value.copy(
                 status = customerConversationResponseStatus,
-                customer = customerConversationResponseStatus.data
+                customer = customer,
+                lastInteractionOlderThanOneDay = customer.lastInteractionOlderThanOneDay
             )
         } else {
             state.value.copy(

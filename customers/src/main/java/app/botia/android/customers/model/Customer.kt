@@ -3,10 +3,10 @@ package app.botia.android.customers.model
 import app.botia.android.customers.utils.LAST_INTERACTION_DATE_FORMAT
 import app.botia.android.customers.utils.LAST_INTERACTION_HOUR_FORMAT
 import app.botia.android.customers.utils.getTimeWithFormat
-import java.text.SimpleDateFormat
+import kotlin.math.abs
 import java.util.Collections
-import java.util.Date
-import java.util.Locale
+
+private const val ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 class Customer(
     val id: Int,
@@ -31,6 +31,16 @@ class Customer(
         LAST_INTERACTION_HOUR_FORMAT,
         lastInteractionTimestamp,
     )
+
+    val lastInteractionOlderThanOneDay: Boolean
+        get() {
+            val currentTimeMillis = System.currentTimeMillis() / 1000
+            val lastInteractionTimestamp1 = lastInteractionTimestamp
+            val difference = currentTimeMillis - lastInteractionTimestamp1
+            val oneDayInSeconds = ONE_DAY_IN_SECONDS
+            return abs(difference) > (oneDayInSeconds)
+        }
+
 
     override fun compareTo(other: Customer) =
         if (lastInteractionTimestamp >= other.lastInteractionTimestamp) -1 else 1

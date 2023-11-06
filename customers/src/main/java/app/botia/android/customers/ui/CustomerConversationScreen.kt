@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,9 +23,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,7 +35,6 @@ import app.botia.android.customers.model.CustomerMessage
 import app.botia.android.ui.ErrorDialog
 import app.botia.android.ui.LoadingWheel
 import app.botia.android.ui.WhiteTopAppBar
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,38 +87,58 @@ fun CustomerConversationScreen(
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextField(
-                    modifier = Modifier
-                        .weight(1f),
-                    value = messageToSend,
-                    onValueChange = { newText ->
-                        customerConversationViewModel.updateMessageToSend(newText)
-                    },
-                    placeholder = {
-                        Text(text = stringResource(id = R.string.message))
-                    }
-                )
-                IconButton(
-                    enabled = !messageToSend.isNullOrEmpty(),
-                    onClick = {
-                        customerConversationViewModel.sendMessageToCustomer()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Send,
-                        contentDescription = stringResource(id = R.string.send),
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(start = 8.dp)
-                    )
+            messageFieldRow(
+                customer?.lastInteractionOlderThanOneDay,
+                messageToSend,
+                onMessageToSendUpdated = {
+                    customerConversationViewModel.updateMessageToSend(it)
+                },
+                onSendMessageClick = {
+                    customerConversationViewModel.sendMessageToCustomer()
                 }
+            )
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun messageFieldRow(
+    lastInteractionOlderThanOneDay: Boolean?,
+    messageToSend: String,
+    onMessageToSendUpdated: (String) -> Unit,
+    onSendMessageClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            modifier = Modifier
+                .weight(1f),
+            value = messageToSend,
+            onValueChange = { newText ->
+                onMessageToSendUpdated(newText)
+            },
+            placeholder = {
+                Text(text = stringResource(id = R.string.message))
             }
+        )
+        IconButton(
+            enabled = !messageToSend.isNullOrEmpty() && lastInteractionOlderThanOneDay != null,
+            onClick = {
+                onSendMessageClick()
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Send,
+                contentDescription = stringResource(id = R.string.send),
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(start = 8.dp)
+            )
         }
     }
 }

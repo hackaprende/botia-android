@@ -31,6 +31,12 @@ interface CustomerRepository {
         customerId: Int,
         messageToSend: String,
     ): Flow<ApiResponseStatus<SendMessageResult>>
+
+    fun sendStartConversationTemplateToCustomer(
+        companyId: Int,
+        customerId: Int,
+        messageToSend: String,
+    ): Flow<ApiResponseStatus<SendMessageResult>>
 }
 
 class CustomerRepositoryImpl @Inject constructor(
@@ -108,6 +114,28 @@ class CustomerRepositoryImpl @Inject constructor(
             val sendMessageToCustomerRequest =
                 SendMessageToCustomerRequest(companyId, customerId, messageToSend)
             val response = customerApiService.sendMessageToCustomer(
+                sendMessageToCustomerRequest = sendMessageToCustomerRequest
+            )
+
+            val status = response.status
+            var error: SendMessageError? = null
+            if (status == "error_sending_message") {
+                val sendMessageErrorMapper = SendMessageErrorMapper()
+                error = sendMessageErrorMapper.fromSendMessageErrorDTOToDomain(response.error)
+            }
+
+            return@makeNetworkCall SendMessageResult(error)
+        }
+
+    override fun sendStartConversationTemplateToCustomer(
+        companyId: Int,
+        customerId: Int,
+        messageToSend: String,
+    ): Flow<ApiResponseStatus<SendMessageResult>> =
+        network.makeNetworkCall {
+            val sendMessageToCustomerRequest =
+                SendMessageToCustomerRequest(companyId, customerId, messageToSend)
+            val response = customerApiService.sendStartConversationTemplateToCustomer(
                 sendMessageToCustomerRequest = sendMessageToCustomerRequest
             )
 
