@@ -9,6 +9,7 @@ import app.botia.android.core.util.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -103,9 +104,10 @@ class AuthViewModel @Inject constructor(
                 }
 
                 else -> {
+                    val fcmToken = sessionManager.fcmTokenFlow().first()
                     authRepository
-                        .signUp(username, password, firstName, lastName)
-                        .onEach (::processLoginResult)
+                        .signUp(username, password, firstName, lastName, fcmToken)
+                        .onEach(::processLoginResult)
                         .launchIn(viewModelScope)
                     state.value
                 }

@@ -16,11 +16,19 @@ import app.botia.android.core.NOTIFICATION_ACTION_CUSTOMER_NEED_HELP
 import app.botia.android.core.NOTIFICATION_ACTION_KEY
 import app.botia.android.core.NOTIFICATION_CUSTOMER_ID_KEY
 import app.botia.android.core.NOTIFICATION_CUSTOMER_PHONE_KEY
+import app.botia.android.core.util.SessionManager
 import app.botia.android.customers.ui.CustomersActivity
 import app.botia.android.workers.FirebaseNotificationsWorker
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class FirebaseMessagingService : FirebaseMessagingService() {
 
     private enum class NotificationType {
@@ -31,6 +39,9 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
         private val TAG = FirebaseMessagingService::class.java.simpleName
     }
+
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     /**
      * Called when message is received.
@@ -117,7 +128,11 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // FCM registration token to your app server.
-        sendRegistrationToServer(token)
+        val job = Job()
+        val scope = CoroutineScope(Dispatchers.IO + job)
+        scope.launch {
+            sessionManager.storeFcmToken(token)
+        }
     }
     // [END on_new_token]
 
@@ -136,19 +151,6 @@ class FirebaseMessagingService : FirebaseMessagingService() {
      */
     private fun handleNow() {
         Log.d(TAG, "Short lived task is done.")
-    }
-
-    /**
-     * Persist token to third-party servers.
-     *
-     * Modify this method to associate the user's FCM registration token with any server-side account
-     * maintained by your application.
-     *
-     * @param token The new token.
-     */
-    private fun sendRegistrationToServer(token: String?) {
-        // TODO: Implement this method to send token to your app server.
-        Log.d(TAG, "sendRegistrationTokenToServer($token)")
     }
 
     /**

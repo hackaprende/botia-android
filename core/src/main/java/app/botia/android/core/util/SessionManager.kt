@@ -18,13 +18,18 @@ interface SessionManager {
 
     suspend fun logout()
 
+    suspend fun storeFcmToken(fcmToken: String)
+
     fun userTokenFlow(): Flow<String>
     fun userIdFlow(): Flow<Int>
+
+    fun fcmTokenFlow(): Flow<String>
 }
 
 val USER_ID_KEY = intPreferencesKey("user_id")
 val USER_TOKEN_KEY = stringPreferencesKey("user_auth_token")
 val USER_EMAIL_KEY = stringPreferencesKey("user_email")
+val FCM_TOKEN_KEY = stringPreferencesKey("fcm_token")
 
 private val Context.dataStore: DataStore<Preferences> by
 preferencesDataStore(name = "user_settings")
@@ -37,6 +42,12 @@ class SessionManagerImpl@Inject constructor(
             it[USER_ID_KEY] = user.id
             it[USER_TOKEN_KEY] = user.authenticationToken
             it[USER_EMAIL_KEY] = user.email
+        }
+    }
+
+    override suspend fun storeFcmToken(fcmToken: String) {
+        dataStore.edit {
+            it[FCM_TOKEN_KEY] = fcmToken
         }
     }
 
@@ -54,5 +65,9 @@ class SessionManagerImpl@Inject constructor(
 
     override fun userIdFlow(): Flow<Int> = dataStore.data.map {
         it[USER_ID_KEY] ?: 0
+    }
+
+    override fun fcmTokenFlow(): Flow<String> = dataStore.data.map {
+        it[FCM_TOKEN_KEY] ?: ""
     }
 }

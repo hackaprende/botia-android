@@ -12,13 +12,19 @@ import javax.inject.Inject
 
 interface AuthRepository {
     fun login(username: String, password: String): Flow<ApiResponseStatus<User>>
-    fun signUp(username: String, password: String, firstName: String, lastName: String): Flow<ApiResponseStatus<User>>
+    fun signUp(
+        username: String,
+        password: String,
+        firstName: String,
+        lastName: String,
+        fcmToken: String
+    ): Flow<ApiResponseStatus<User>>
 }
 
 class AuthRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
     private val network: Network,
-) : app.botia.android.auth.repository.AuthRepository {
+) : AuthRepository {
     override fun login(username: String, password: String) =
         network.makeNetworkCall {
             val loginDTO = LoginDTO(username, password)
@@ -38,8 +44,9 @@ class AuthRepositoryImpl @Inject constructor(
         password: String,
         firstName: String,
         lastName: String,
+        fcmToken: String,
     ) = network.makeNetworkCall {
-        val signUpDTO = SignUpDTO(username, password, firstName, lastName)
+        val signUpDTO = SignUpDTO(username, password, firstName, lastName, fcmToken)
         val signUpResponse = apiService.signUp(signUpDTO)
 
         if (!signUpResponse.isSuccess) {

@@ -7,4 +7,5 @@ class SignUpDTO(
     val password: String,
     @field:Json(name = "first_name") val firstName: String,
     @field:Json(name = "last_name") val lastName: String,
+    @field:Json(name = "fcm_token") val fcmToken: String,
 )
