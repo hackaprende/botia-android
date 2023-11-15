@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 interface AuthRepository {
-    fun login(username: String, password: String): Flow<ApiResponseStatus<User>>
+    fun login(username: String, password: String, fcmToken: String): Flow<ApiResponseStatus<User>>
     fun signUp(
         username: String,
         password: String,
@@ -25,9 +25,9 @@ class AuthRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
     private val network: Network,
 ) : AuthRepository {
-    override fun login(username: String, password: String) =
+    override fun login(username: String, password: String, fcmToken: String) =
         network.makeNetworkCall {
-            val loginDTO = LoginDTO(username, password)
+            val loginDTO = LoginDTO(username, password, fcmToken)
             val loginResponse = apiService.login(loginDTO)
 
             if (!loginResponse.isSuccess) {

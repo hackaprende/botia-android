@@ -61,10 +61,13 @@ class AuthViewModel @Inject constructor(
     }
 
     fun login(username: String, password: String) {
-        authRepository
-            .login(username, password)
-            .onEach (::processLoginResult)
-            .launchIn(viewModelScope)
+        viewModelScope.launch {
+            val fcmToken = sessionManager.fcmTokenFlow().first()
+            authRepository
+                .login(username, password, fcmToken)
+                .onEach (::processLoginResult)
+                .launchIn(viewModelScope)
+        }
     }
 
     fun signUp(
