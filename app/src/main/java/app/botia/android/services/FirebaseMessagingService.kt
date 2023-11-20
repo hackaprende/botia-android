@@ -12,10 +12,14 @@ import androidx.core.app.NotificationCompat
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import app.botia.android.R
-import app.botia.android.core.NOTIFICATION_ACTION_CUSTOMER_NEED_HELP
-import app.botia.android.core.NOTIFICATION_ACTION_KEY
+import app.botia.android.auth.ui.AuthActivity
+import app.botia.android.core.NOTIFICATION_TYPE_CUSTOMER_MESSAGE
+import app.botia.android.core.NOTIFICATION_TYPE_KEY
+import app.botia.android.core.NOTIFICATION_BODY
+import app.botia.android.core.NOTIFICATION_COMPANY_ID_KEY
 import app.botia.android.core.NOTIFICATION_CUSTOMER_ID_KEY
-import app.botia.android.core.NOTIFICATION_CUSTOMER_PHONE_KEY
+import app.botia.android.core.NOTIFICATION_TITLE
+import app.botia.android.core.api.ApiServiceInterceptorHandler
 import app.botia.android.core.util.SessionManager
 import app.botia.android.customers.ui.CustomersActivity
 import app.botia.android.workers.FirebaseNotificationsWorker
@@ -25,20 +29,19 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class FirebaseMessagingService : FirebaseMessagingService() {
-
-    private enum class NotificationType {
-        CUSTOMER_NEED_HELP, DEFAULT
-    }
-
     companion object {
 
         private val TAG = FirebaseMessagingService::class.java.simpleName
     }
+
+    private var job = Job()
+    private val backgroundScope = CoroutineScope(Dispatchers.IO + job)
 
     @Inject
     lateinit var sessionManager: SessionManager
@@ -79,42 +82,64 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             }
         }
 
-        var notificationType = NotificationType.DEFAULT
-        var customerPhone: String? = null
-        var customerId: String? = null
-        var action: String? = null
-        if (data.containsKey(NOTIFICATION_ACTION_KEY)) {
-            action = data["action"]
-            if (action == NOTIFICATION_ACTION_CUSTOMER_NEED_HELP) {
-                customerPhone = data[NOTIFICATION_CUSTOMER_PHONE_KEY]
-                customerId = data[NOTIFICATION_CUSTOMER_ID_KEY]
-                notificationType = NotificationType.CUSTOMER_NEED_HELP
-            }
-        }
-
-        // Check if message contains a notification payload.
-        remoteMessage.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
-            it.body?.let { body ->
-                it.title?.let { title ->
+        setSessionTokenIfLoggedIn {
+            userLoggedIn ->
+            val notificationTitle = data[NOTIFICATION_TITLE]
+            val notificationBody = data[NOTIFICATION_BODY]
+            val intent = buildIntent(userLoggedIn, data)
+            notificationTitle?.let { body ->
+                notificationBody?.let { title ->
                     sendNotification(
                         title,
                         body,
-                        notificationType,
-                        action,
-                        customerPhone,
-                        customerId,
+                        intent,
                     )
                 }
             }
         }
-
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
     }
-    // [END receive_message]
 
-    private fun isLongRunningJob() = true
+    private fun setSessionTokenIfLoggedIn(onSessionTokenSet: (userLoggedIn: Boolean) -> Unit) {
+        backgroundScope.launch {
+            sessionManager
+                .userTokenFlow()
+                .collectLatest { authenticationToken ->
+                    val userLoggedIn = authenticationToken.isNotEmpty()
+
+                    if (userLoggedIn) {
+                        // Set the token to the interceptor so it's added in the headers
+                        // of any request that needs authentication.
+                        ApiServiceInterceptorHandler.setSessionToken(authenticationToken)
+                    }
+
+                    onSessionTokenSet(userLoggedIn)
+                }
+        }
+    }
+
+    private fun buildIntent(userLoggedIn: Boolean, data: Map<String, String>): Intent {
+        if (!userLoggedIn) return Intent(this, AuthActivity::class.java)
+
+        if (data.containsKey(NOTIFICATION_TYPE_KEY)) {
+            val action = data[NOTIFICATION_TYPE_KEY]
+            val companyId = data[NOTIFICATION_COMPANY_ID_KEY]
+            val customerId = data[NOTIFICATION_CUSTOMER_ID_KEY]
+            if (action == NOTIFICATION_TYPE_CUSTOMER_MESSAGE &&
+                companyId != null &&
+                customerId != null
+            ) {
+                return CustomersActivity.makeGoToConversationIntent(
+                    context = this,
+                    companyId = companyId.toInt(),
+                    customerId = customerId.toInt(),
+                )
+            }
+        }
+
+        return Intent(this, CustomersActivity::class.java)
+    }
+
+    private fun isLongRunningJob() = false
 
     // [START on_new_token]
     /**
@@ -161,22 +186,9 @@ class FirebaseMessagingService : FirebaseMessagingService() {
     private fun sendNotification(
         messageTitle: String,
         messageBody: String,
-        notificationType: NotificationType = NotificationType.DEFAULT,
-        action: String? = null,
-        customerPhone: String? = null,
-        customerId: String? = null
+        intent: Intent,
     ) {
         val requestCode = 0
-        val intent = Intent(this, CustomersActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-
-        if (action != null) {
-            intent.putExtra(NOTIFICATION_ACTION_KEY, action)
-            if (notificationType == NotificationType.CUSTOMER_NEED_HELP) {
-                intent.putExtra(NOTIFICATION_CUSTOMER_PHONE_KEY, customerPhone)
-                intent.putExtra(NOTIFICATION_CUSTOMER_ID_KEY, customerId)
-            }
-        }
 
         val pendingIntent = PendingIntent.getActivity(
             this,

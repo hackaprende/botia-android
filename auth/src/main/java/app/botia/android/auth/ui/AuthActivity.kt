@@ -25,7 +25,7 @@ class AuthActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    app.botia.android.auth.ui.AuthScreen(onUserLoggedIn = { authenticationToken ->
+                    AuthScreen(onUserLoggedIn = { authenticationToken ->
                         ApiServiceInterceptorHandler.setSessionToken(authenticationToken)
                         openCustomersActivity()
                     })

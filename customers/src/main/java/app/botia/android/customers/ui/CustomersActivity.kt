@@ -2,6 +2,7 @@ package app.botia.android.customers.ui
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -20,8 +21,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import app.botia.android.core.NOTIFICATION_ACTION_CUSTOMER_NEED_HELP
-import app.botia.android.core.NOTIFICATION_ACTION_KEY
+import app.botia.android.core.NOTIFICATION_TYPE_CUSTOMER_MESSAGE
+import app.botia.android.core.NOTIFICATION_TYPE_KEY
 import app.botia.android.core.NOTIFICATION_CUSTOMER_ID_KEY
 import app.botia.android.core.NOTIFICATION_CUSTOMER_PHONE_KEY
 import app.botia.android.customers.R
@@ -34,6 +35,20 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class CustomersActivity : ComponentActivity() {
+
+    companion object {
+        private const val CUSTOMER_ID_KEY = "customer_id"
+        private const val COMPANY_ID_KEY = "company_id"
+
+        fun makeGoToConversationIntent(
+            context: Context,
+            companyId: Int,
+            customerId: Int,
+        ) = Intent(context, CustomersActivity::class.java).apply {
+            putExtra(COMPANY_ID_KEY, companyId)
+            putExtra(CUSTOMER_ID_KEY, customerId)
+        }
+    }
 
     private val tag = CustomersActivity::class.java.simpleName
     private val viewModel: CustomersViewModel by viewModels()
@@ -75,6 +90,15 @@ class CustomersActivity : ComponentActivity() {
                 }
             }
         }
+
+        val extras = intent.extras
+        extras?.getInt(COMPANY_ID_KEY)?.let {
+            companyId ->
+            extras.getInt(CUSTOMER_ID_KEY)?.let {
+                customerId ->
+                openCustomerConversation(companyId, customerId)
+            }
+        }
     }
 
     private fun openCustomerConversation(companyId: Int, customerId: Int) =
@@ -88,9 +112,9 @@ class CustomersActivity : ComponentActivity() {
 
     private fun handleNotificationIntent() {
         val extras = intent.extras
-        val action = extras?.getString(NOTIFICATION_ACTION_KEY)
+        val action = extras?.getString(NOTIFICATION_TYPE_KEY)
         if (action != null) {
-            if (action == NOTIFICATION_ACTION_CUSTOMER_NEED_HELP) {
+            if (action == NOTIFICATION_TYPE_CUSTOMER_MESSAGE) {
                 val phoneNumber = extras.getString(NOTIFICATION_CUSTOMER_PHONE_KEY)
                 val customerId = extras.getString(NOTIFICATION_CUSTOMER_ID_KEY)
                 if (customerId != null) {
